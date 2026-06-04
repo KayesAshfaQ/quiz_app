@@ -57,19 +57,23 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          controller: _questionController,
-                          focusNode: _questionFocusNode,
-                          decoration: InputDecoration(
-                            labelText: 'New Question',
-                            border: OutlineInputBorder(),
+                        child: AnimatedOpacity(
+                          duration: Duration(milliseconds: 150),
+                          opacity: _isFormVisible ? 1.0 : 0.0,
+                          child: TextFormField(
+                            controller: _questionController,
+                            focusNode: _questionFocusNode,
+                            decoration: InputDecoration(
+                              labelText: 'New Question',
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter a question';
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a question';
-                            }
-                            return null;
-                          },
                         ),
                       ),
                       SizedBox(width: 16),
