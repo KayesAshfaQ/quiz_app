@@ -12,6 +12,7 @@ class QuizCategoryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      clipBehavior: Clip.hardEdge,
       child: ListTile(
         title: Text(
           category.name,
