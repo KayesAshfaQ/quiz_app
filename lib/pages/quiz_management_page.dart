@@ -46,56 +46,56 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
         children: [
           Flexible(
             child: AnimatedContainer(
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(color: Colors.transparent),
               duration: Duration(milliseconds: 300),
               height: _isFormVisible ? 100 : 0,
-              child: !_isFormVisible
-                  ? SizedBox()
-                  : Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: _questionController,
-                                focusNode: _questionFocusNode,
-                                decoration: InputDecoration(
-                                  labelText: 'New Question',
-                                  border: OutlineInputBorder(),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter a question';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  setState(() {
-                                    questions.add(_questionController.text);
-                                    // _questionFocusNode.unfocus();
-                                    _questionController.clear();
-                                  });
-                                }
+              child: Form(
+                key: _formKey,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _questionController,
+                          focusNode: _questionFocusNode,
+                          decoration: InputDecoration(
+                            labelText: 'New Question',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter a question';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            setState(() {
+                              questions.add(_questionController.text);
+                              // _questionFocusNode.unfocus();
+                              _questionController.clear();
+                            });
+                          }
 
-                                /* if (_questionController.text.isNotEmpty) {
+                          /* if (_questionController.text.isNotEmpty) {
                             setState(() {
                               questions.add(_questionController.text);
                               _questionController.clear();
                             });
                           } */
-                              },
-                              child: Text('Add'),
-                            ),
-                          ],
-                        ),
+                        },
+                        child: Text('Add'),
                       ),
-                    ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
           Expanded(
