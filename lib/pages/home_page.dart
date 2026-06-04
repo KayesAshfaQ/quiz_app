@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/quiz_category_icon.dart';
-import 'quiz_question_page.dart';
+import 'package:quiz_app/models/quiz_category.dart';
+import '../widgets/quiz_category_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,6 +11,69 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final List<QuizCategory> categories = [
+    QuizCategory(
+      name: 'Mathematics',
+      questionCount: 10,
+      icon: Icons.calculate,
+      color: Colors.blue,
+    ),
+    QuizCategory(
+      name: 'Science & Nature',
+      questionCount: 13,
+      icon: Icons.science,
+      color: Colors.green,
+    ),
+    QuizCategory(
+      name: 'History',
+      questionCount: 12,
+      icon: Icons.history,
+      color: Colors.orange,
+    ),
+    QuizCategory(
+      name: 'Geography',
+      questionCount: 11,
+      icon: Icons.map,
+      color: Colors.purple,
+    ),
+    QuizCategory(
+      name: 'Sports',
+      questionCount: 14,
+      icon: Icons.sports_soccer,
+      color: Colors.red,
+    ),
+    QuizCategory(
+      name: 'Entertainment',
+      questionCount: 15,
+      icon: Icons.movie,
+      color: Colors.pink,
+    ),
+    QuizCategory(
+      name: 'Art & Literature',
+      questionCount: 16,
+      icon: Icons.art_track,
+      color: Colors.indigo,
+    ),
+    QuizCategory(
+      name: 'Technology',
+      questionCount: 17,
+      icon: Icons.computer,
+      color: Colors.teal,
+    ),
+    QuizCategory(
+      name: 'Music',
+      questionCount: 18,
+      icon: Icons.music_note,
+      color: Colors.yellow,
+    ),
+    QuizCategory(
+      name: 'General Knowledge',
+      questionCount: 19,
+      icon: Icons.question_answer,
+      color: Colors.brown,
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,42 +82,12 @@ class _HomePageState extends State<HomePage> {
         title: Text('Quiz Categories'),
         automaticallyImplyActions: true,
       ),
-      body: ListView(
+      body: ListView.builder(
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          return QuizCategoryWidget(category: categories[index]);
+        },
         padding: EdgeInsets.all(16),
-        children: [
-          Card(
-            child: ListTile(
-              title: Text(
-                'Mathematics',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              subtitle: Text('10 Questions'),
-              leading: QuizCategoryIcon(icon: Icons.calculate),
-              trailing: Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                // Navigate to quiz question page
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => QuizQuestionPage()),
-                );
-              },
-            ),
-          ),
-          Card(
-            child: ListTile(
-              title: Text(
-                'Science & Nature',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              subtitle: Text('13 Questions'),
-              leading: QuizCategoryIcon(
-                icon: Icons.science,
-                color: Colors.green,
-              ),
-              trailing: Icon(Icons.arrow_forward_ios),
-            ),
-          ),
-        ],
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Increment',
