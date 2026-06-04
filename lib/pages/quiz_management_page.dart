@@ -38,7 +38,11 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
                 _isFormVisible = !_isFormVisible;
               });
             },
-            icon: Icon(Icons.arrow_downward),
+            icon: Icon(
+              _isFormVisible
+                  ? Icons.keyboard_arrow_up
+                  : Icons.keyboard_arrow_down,
+            ),
           ),
         ],
       ),
@@ -86,13 +90,6 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
                               _questionController.clear();
                             });
                           }
-
-                          /* if (_questionController.text.isNotEmpty) {
-                            setState(() {
-                              questions.add(_questionController.text);
-                              _questionController.clear();
-                            });
-                          } */
                         },
                         child: Text('Add'),
                       ),
