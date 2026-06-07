@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'quiz_management_page.dart';
+import '../app_route.dart';
 
 class QuizQuestionPage extends StatelessWidget {
   const QuizQuestionPage({super.key});
@@ -13,10 +13,7 @@ class QuizQuestionPage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => QuizManagementPage()),
-              );
+              Navigator.pushNamed(context, AppRoute.quizManagement);
             },
             icon: Icon(Icons.add),
           ),
@@ -35,7 +32,12 @@ class QuizQuestionPage extends StatelessWidget {
             ),
             Divider(thickness: 1.5),
             OutlinedButton(onPressed: () {}, child: Text('A. Paris')),
-            OutlinedButton(onPressed: () {}, child: Text('B. London')),
+            OutlinedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('B. London'),
+            ),
           ],
         ),
       ),

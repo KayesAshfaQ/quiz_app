@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'pages/home_page.dart';
+import 'app_route.dart';
 
 void main() {
   runApp(const QuizApp());
@@ -34,7 +34,8 @@ class QuizApp extends StatelessWidget {
       ),
       darkTheme: ThemeData.dark(useMaterial3: true),
       themeMode: ThemeMode.light,
-      home: const HomePage(),
+      routes: AppRoute.routes,
+      initialRoute: AppRoute.home,
     );
   }
 }

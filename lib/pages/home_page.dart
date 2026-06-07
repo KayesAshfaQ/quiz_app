@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:quiz_app/models/quiz_category.dart';
-import '../widgets/quiz_category_widget.dart';
+import '../widgets/category_type_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -74,26 +74,66 @@ class _HomePageState extends State<HomePage> {
     ),
   ];
 
+  List<QuizCategory> _filterCategories(String type) {
+    switch (type) {
+      case 'Popular':
+        return categories
+            .where(
+              (c) => [
+                'Science & Nature',
+                'History',
+                'Sports',
+                'Entertainment',
+              ].contains(c.name),
+            )
+            .toList();
+      case 'New':
+        return categories
+            .where(
+              (c) => [
+                'Art & Literature',
+                'Technology',
+                'Music',
+                'General Knowledge',
+              ].contains(c.name),
+            )
+            .toList();
+      default:
+        return categories;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Quiz Categories'),
-        automaticallyImplyActions: true,
-      ),
-      body: ListView.builder(
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          return QuizCategoryWidget(category: categories[index]);
-        },
-        padding: EdgeInsets.all(16),
-      ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-        onPressed: () {},
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text('Quiz Categories'),
+          automaticallyImplyActions: true,
+          bottom: TabBar(
+            tabs: [
+              Tab(text: 'All', icon: Icon(Icons.list)),
+              Tab(text: 'Popular', icon: Icon(Icons.star)),
+              Tab(text: 'New', icon: Icon(Icons.new_releases)),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            CategoryTypeWidget(categories: categories),
+            CategoryTypeWidget(categories: _filterCategories('Popular')),
+            CategoryTypeWidget(categories: _filterCategories('New')),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          tooltip: 'Increment',
+          child: const Icon(Icons.add),
+          onPressed: () {},
+        ),
       ),
     );
   }
 }
+
