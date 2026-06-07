@@ -1,24 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../app_route.dart';
-
 class QuizQuestionPage extends StatelessWidget {
   const QuizQuestionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Question 1 of 10'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoute.quizManagement);
-            },
-            icon: Icon(Icons.add),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text('Question 1 of 10')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:quiz_app/models/quiz_category.dart';
+import '../app_route.dart';
 import '../widgets/category_type_widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -128,12 +129,13 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          tooltip: 'Increment',
+          tooltip: 'Manage Quizzes',
           child: const Icon(Icons.add),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoute.quizManagement);
+          },
         ),
       ),
     );
   }
 }
-
