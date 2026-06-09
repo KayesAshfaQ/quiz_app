@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:quiz_app/app_route.dart';
 
 import '../models/quiz_category.dart';
@@ -12,10 +13,11 @@ class QuizCategoryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).colorScheme.inversePrimary,
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: () {
-          Navigator.pushNamed(context, AppRoute.quizQuestion);
+          context.push(AppRoute.quizQuestion);
         },
         child: Padding(
           padding: const EdgeInsets.all(16),

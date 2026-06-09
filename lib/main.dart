@@ -11,7 +11,7 @@ class QuizApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -34,8 +34,7 @@ class QuizApp extends StatelessWidget {
       ),
       darkTheme: ThemeData.dark(useMaterial3: true),
       themeMode: ThemeMode.light,
-      routes: AppRoute.routes,
-      initialRoute: AppRoute.home,
+      routerConfig: AppRoute.routes,
     );
   }
 }

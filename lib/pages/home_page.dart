@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:quiz_app/models/quiz_category.dart';
 import '../app_route.dart';
@@ -132,7 +133,7 @@ class _HomePageState extends State<HomePage> {
           tooltip: 'Manage Quizzes',
           child: const Icon(Icons.add),
           onPressed: () {
-            Navigator.pushNamed(context, AppRoute.quizManagement);
+            context.push(AppRoute.quizManagement);
           },
         ),
       ),

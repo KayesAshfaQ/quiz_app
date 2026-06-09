@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class QuizQuestionPage extends StatelessWidget {
   const QuizQuestionPage({super.key});
@@ -22,7 +23,7 @@ class QuizQuestionPage extends StatelessWidget {
             OutlinedButton(onPressed: () {}, child: Text('A. Paris')),
             OutlinedButton(
               onPressed: () {
-                Navigator.pop(context);
+                context.pop();
               },
               child: Text('B. London'),
             ),

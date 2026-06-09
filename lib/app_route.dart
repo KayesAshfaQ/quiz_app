@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'pages/home_page.dart';
 import 'pages/quiz_management_page.dart';
@@ -9,9 +10,18 @@ class AppRoute {
   static const String quizQuestion = '/quiz-question';
   static const String quizManagement = '/quiz-management';
 
-  static Map<String, WidgetBuilder> get routes => {
-    home: (context) => HomePage(),
-    quizQuestion: (context) => QuizQuestionPage(),
-    quizManagement: (context) => QuizManagementPage(),
-  };
+  static final routes = GoRouter(
+    initialLocation: home,
+    routes: [
+      GoRoute(path: home, builder: (context, state) => HomePage()),
+      GoRoute(
+        path: quizQuestion,
+        builder: (context, state) => QuizQuestionPage(),
+      ),
+      GoRoute(
+        path: quizManagement,
+        builder: (context, state) => QuizManagementPage(),
+      ),
+    ],
+  );
 }
