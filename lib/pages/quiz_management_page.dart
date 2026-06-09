@@ -25,6 +25,8 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('Building QuizManagementPage with ${questions.length} questions');
+
     return Scaffold(
       appBar: AppBar(title: Text('Quiz Management'), actions: [
           

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'app_route.dart';
+import 'providers/quiz_provider.dart';
 
 void main() {
   runApp(const QuizApp());
@@ -11,30 +13,33 @@ class QuizApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.indigo),
-        textTheme: TextTheme(
-          titleSmall: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        floatingActionButtonTheme: FloatingActionButtonThemeData(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    return ChangeNotifierProvider(
+      create: (_) => QuizProvider(),
+      child: MaterialApp.router(
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: .fromSeed(seedColor: Colors.indigo),
+          textTheme: TextTheme(
+            titleSmall: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-        ),
-        appBarTheme: AppBarTheme(centerTitle: false),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            minimumSize: Size(double.infinity, 48),
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
+          appBarTheme: AppBarTheme(centerTitle: false),
+          outlinedButtonTheme: OutlinedButtonThemeData(
+            style: OutlinedButton.styleFrom(
+              minimumSize: Size(double.infinity, 48),
+            ),
+          ),
+          useMaterial3: true,
         ),
-        useMaterial3: true,
+        darkTheme: ThemeData.dark(useMaterial3: true),
+        themeMode: ThemeMode.light,
+        routerConfig: AppRoute.routes,
       ),
-      darkTheme: ThemeData.dark(useMaterial3: true),
-      themeMode: ThemeMode.light,
-      routerConfig: AppRoute.routes,
     );
   }
 }

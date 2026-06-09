@@ -13,7 +13,6 @@ class QuizCategoryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).colorScheme.inversePrimary,
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: () {

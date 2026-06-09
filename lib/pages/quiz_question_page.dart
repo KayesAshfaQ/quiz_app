@@ -1,35 +1,105 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:quiz_app/providers/quiz_provider.dart';
 
-class QuizQuestionPage extends StatelessWidget {
+class QuizQuestionPage extends StatefulWidget {
   const QuizQuestionPage({super.key});
 
   @override
+  State<QuizQuestionPage> createState() => _QuizQuestionPageState();
+}
+
+class _QuizQuestionPageState extends State<QuizQuestionPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<QuizProvider>().startQuiz();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Question 1 of 10')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 12,
-          children: [
-            Chip(label: Text('Easy'), backgroundColor: Colors.green.shade100),
-            Text(
-              'What is the capital of France?',
-              style: Theme.of(context).textTheme.headlineSmall,
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Consumer<QuizProvider>(
+      builder: (context, quiz, _) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              'Question ${quiz.currentIndex + 1} of ${quiz.questions.length}',
             ),
-            Divider(thickness: 1.5),
-            OutlinedButton(onPressed: () {}, child: Text('A. Paris')),
-            OutlinedButton(
-              onPressed: () {
-                context.pop();
-              },
-              child: Text('B. London'),
-            ),
-          ],
-        ),
-      ),
+            backgroundColor: colorScheme.inversePrimary,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: Chip(
+                  avatar: Icon(Icons.star),
+                  label: Text(
+                    '${quiz.score} pts',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                child: LinearProgressIndicator(
+                  value: quiz.secondsLeft / QuizProvider.totalSeconds,
+                  minHeight: 6,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 12,
+                  children: [
+                    Row(
+                      mainAxisAlignment: .end,
+                      children: [
+                        Icon(Icons.timer, size: 16),
+                        SizedBox(width: 4),
+                        AnimatedSwitcher(
+                          duration: Duration(milliseconds: 300),
+                          child: Text(
+                            '${quiz.secondsLeft} s',
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Chip(
+                      label: Text('Easy'),
+                      backgroundColor: Colors.green.shade100,
+                    ),
+                    Text(
+                      'What is the capital of France?',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    Divider(thickness: 1.5),
+                    ...List.generate(quiz.currentQuestion.options.length, (
+                      index,
+                    ) {
+                      return OutlinedButton(
+                        onPressed: () {
+                          // Handle answer selection
+                          quiz.selectedAnswer(index);
+                        },
+                        child: Text(quiz.currentQuestion.options[index]),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
