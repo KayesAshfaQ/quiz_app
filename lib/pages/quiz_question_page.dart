@@ -25,6 +25,12 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
 
     return Consumer<QuizProvider>(
       builder: (context, quiz, _) {
+        if (quiz.questions.isEmpty) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
         return Scaffold(
           appBar: AppBar(
             title: Text(
