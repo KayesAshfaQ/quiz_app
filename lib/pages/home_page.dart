@@ -121,6 +121,15 @@ class _HomePageState extends State<HomePage> {
               Tab(text: 'New', icon: Icon(Icons.new_releases)),
             ],
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.leaderboard),
+              tooltip: 'Scoreboard',
+              onPressed: () {
+                context.push(AppRoute.scoreboard);
+              },
+            ),
+          ],
         ),
         body: TabBarView(
           children: [

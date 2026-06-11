@@ -103,7 +103,7 @@ class QuizProvider extends ChangeNotifier {
     _selectedAnswers[_currentIndex] = answerIndex;
 
     if (answerIndex == currentQuestion.correctOptionIndex) {
-      _correctCount ++;
+      _correctCount++;
     }
     notifyListeners();
 
@@ -139,6 +139,18 @@ class QuizProvider extends ChangeNotifier {
   void _cancelTimer() {
     _timer?.cancel();
     _timer = null;
+  }
+
+  /// Reset all state back to idle.
+  void reset() {
+    _cancelTimer();
+    _questions = [];
+    _currentIndex = 0;
+    _selectedAnswers = [];
+    _correctCount = 0;
+    _secondsLeft = totalSeconds;
+    _status = QuizStatus.idle;
+    notifyListeners();
   }
 
   @override

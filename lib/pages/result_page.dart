@@ -1,7 +1,13 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:quiz_app/app_route.dart';
 
 import 'package:quiz_app/models/quiz_result.dart';
+import 'package:quiz_app/models/scoreboard_entry.dart';
+import 'package:quiz_app/providers/quiz_provider.dart';
+import 'package:quiz_app/providers/scoreboard_provider.dart';
 import 'package:quiz_app/widgets/score_circle.dart';
 
 class ResultPage extends StatefulWidget {
@@ -14,6 +20,25 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageState extends State<ResultPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // final quiz = context.read<QuizProvider>();
+      final scoreboard = context.read<ScoreboardProvider>();
+
+      final entry = ScoreboardEntry(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        categoryName: '',
+        correctCount: widget.result.correctCount,
+        totalQuestions: widget.result.totalQuestions,
+        timestamp: DateTime.now(),
+      );
+      scoreboard.addEntry(entry);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final result = widget.result;
@@ -60,7 +85,9 @@ class _ResultPageState extends State<ResultPage> {
               ),
             ),
             const SizedBox(height: 20),
-            Center(child: ScoreCircle(result: result, color: scoreColor)),
+            Center(
+              child: ScoreCircle(result: result, color: scoreColor),
+            ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -90,8 +117,9 @@ class _ResultPageState extends State<ResultPage> {
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
               child: Text(
                 'Answer Review',
-                style: Theme.of(context).textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             ...List.generate(result.questions.length, (i) {
@@ -163,9 +191,7 @@ class _ResultPageState extends State<ResultPage> {
                         const SizedBox(height: 6),
                         Text(
                           q.text,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 8),
                         if (!isSkipped && !isCorrect) ...[
@@ -187,6 +213,35 @@ class _ResultPageState extends State<ResultPage> {
                 ),
               );
             }),
+            // ── Action buttons ───────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        context.read<QuizProvider>().reset();
+                        context.go(AppRoute.home);
+                      },
+                      icon: const Icon(Icons.home_outlined),
+                      label: const Text('Home'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        context.read<QuizProvider>().startQuiz();
+                        context.go(AppRoute.quizQuestion);
+                      },
+                      icon: const Icon(Icons.replay),
+                      label: const Text('Play Again'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/models/scoreboard_entry.dart';
+import 'package:quiz_app/providers/scoreboard_provider.dart';
+import 'package:quiz_app/services/hive_storage_service.dart';
 
 import 'app_route.dart';
 import 'providers/quiz_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+  Hive.registerAdapter(ScoreboardEntryAdapter());
+
   runApp(const QuizApp());
 }
 
@@ -13,8 +23,14 @@ class QuizApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => QuizProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => QuizProvider()),
+        ChangeNotifierProvider(
+          create: (_) =>
+              ScoreboardProvider(HiveStorageService())..loadHistory(),
+        ),
+      ],
       child: MaterialApp.router(
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
