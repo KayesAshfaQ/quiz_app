@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/providers/quiz_provider.dart';
+
+import '../app_route.dart';
 
 class QuizQuestionPage extends StatefulWidget {
   const QuizQuestionPage({super.key});
@@ -25,6 +28,15 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
 
     return Consumer<QuizProvider>(
       builder: (context, quiz, _) {
+
+        if (quiz.status == QuizStatus.finished) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              context.go(AppRoute.quizResult, extra: quiz.result);
+            }
+          });
+        }
+
         if (quiz.questions.isEmpty) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
@@ -59,47 +71,51 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
                   minHeight: 6,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 12,
-                  children: [
-                    Row(
-                      mainAxisAlignment: .end,
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 12,
                       children: [
-                        Icon(Icons.timer, size: 16),
-                        SizedBox(width: 4),
-                        AnimatedSwitcher(
-                          duration: Duration(milliseconds: 300),
-                          child: Text(
-                            '${quiz.secondsLeft} s',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(Icons.timer, size: 16),
+                            SizedBox(width: 4),
+                            AnimatedSwitcher(
+                              duration: Duration(milliseconds: 300),
+                              child: Text(
+                                '${quiz.secondsLeft} s',
+                                style: Theme.of(context).textTheme.labelMedium,
+                              ),
+                            ),
+                          ],
                         ),
+                        Chip(
+                          label: Text('Easy'),
+                          backgroundColor: Colors.green.shade100,
+                        ),
+                        Text(
+                          quiz.currentQuestion.text,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        Divider(thickness: 1.5),
+                        ...List.generate(quiz.currentQuestion.options.length, (
+                          index,
+                        ) {
+                          return OutlinedButton(
+                            onPressed: () {
+                              // Handle answer selection
+                              quiz.selectedAnswer(index);
+                            },
+                            child: Text(quiz.currentQuestion.options[index]),
+                          );
+                        }),
                       ],
                     ),
-                    Chip(
-                      label: Text('Easy'),
-                      backgroundColor: Colors.green.shade100,
-                    ),
-                    Text(
-                      'What is the capital of France?',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    Divider(thickness: 1.5),
-                    ...List.generate(quiz.currentQuestion.options.length, (
-                      index,
-                    ) {
-                      return OutlinedButton(
-                        onPressed: () {
-                          // Handle answer selection
-                          quiz.selectedAnswer(index);
-                        },
-                        child: Text(quiz.currentQuestion.options[index]),
-                      );
-                    }),
-                  ],
+                  ),
                 ),
               ),
             ],

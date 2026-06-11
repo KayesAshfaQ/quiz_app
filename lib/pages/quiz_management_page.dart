@@ -34,93 +34,97 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
       ),
       body: Column(
         children: [
-          Form(
-            key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                spacing: 12,
-                children: [
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Quiz Title',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a quiz title';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _categoryController,
-                    decoration: InputDecoration(
-                      labelText: 'Quiz Category',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a quiz category';
-                      }
-                      return null;
-                    },
-                  ),
-
-                  Divider(height: 24),
-                  Text(
-                    'Add Questions',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-
-                  TextFormField(
-                    controller: _questionController,
-                    decoration: InputDecoration(
-                      labelText: 'New Question',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a question';
-                      }
-                      return null;
-                    },
-                  ),
-
-                  SizedBox(height: 12),
-
-                  ...List.generate(4, (index) {
-                    return Row(
-                      children: [
-                        Radio<int>(
-                          value: index,
-                          groupValue: _correctOptionIndex,
-                          onChanged: (value) {
-                            setState(() {
-                              _correctOptionIndex = value!;
-                            });
-                          },
+          Expanded(
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    spacing: 12,
+                    children: [
+                      TextFormField(
+                        controller: _titleController,
+                        decoration: InputDecoration(
+                          labelText: 'Quiz Title',
+                          border: OutlineInputBorder(),
                         ),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _optionControllers[index],
-                            decoration: InputDecoration(
-                              labelText: 'Option ${index + 1}',
-                              border: OutlineInputBorder(),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a quiz title';
+                          }
+                          return null;
+                        },
+                      ),
+                      TextFormField(
+                        controller: _categoryController,
+                        decoration: InputDecoration(
+                          labelText: 'Quiz Category',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a quiz category';
+                          }
+                          return null;
+                        },
+                      ),
+    
+                      Divider(height: 24),
+                      Text(
+                        'Add Questions',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+    
+                      TextFormField(
+                        controller: _questionController,
+                        decoration: InputDecoration(
+                          labelText: 'New Question',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a question';
+                          }
+                          return null;
+                        },
+                      ),
+    
+                      SizedBox(height: 12),
+    
+                      ...List.generate(4, (index) {
+                        return Row(
+                          children: [
+                            Radio<int>(
+                              value: index,
+                              groupValue: _correctOptionIndex,
+                              onChanged: (value) {
+                                setState(() {
+                                  _correctOptionIndex = value!;
+                                });
+                              },
                             ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter option ${index + 1}';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ],
+                            Expanded(
+                              child: TextFormField(
+                                controller: _optionControllers[index],
+                                decoration: InputDecoration(
+                                  labelText: 'Option ${index + 1}',
+                                  border: OutlineInputBorder(),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter option ${index + 1}';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

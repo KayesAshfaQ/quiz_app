@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:quiz_app/models/question.dart';
+import 'package:quiz_app/models/quiz_result.dart';
 
 enum QuizStatus { idle, active, finished }
 
@@ -11,7 +12,7 @@ class QuizProvider extends ChangeNotifier {
   List<Question> _questions = [];
   int _currentIndex = 0;
   List<int?> _selectedAnswers = [];
-  int _score = 0;
+  int _correctCount = 0;
   int _secondsLeft = totalSeconds;
   QuizStatus _status = .idle;
   Timer? _timer;
@@ -19,7 +20,7 @@ class QuizProvider extends ChangeNotifier {
   List<Question> get questions => _questions;
   int get currentIndex => _currentIndex;
   List<int?> get selectedAnswers => _selectedAnswers;
-  int get score => _score;
+  int get score => _correctCount;
   int get secondsLeft => _secondsLeft;
   QuizStatus get status => _status;
 
@@ -30,6 +31,14 @@ class QuizProvider extends ChangeNotifier {
   int? get currentAnswer => _selectedAnswers[_currentIndex];
 
   bool get hasAnswered => currentAnswer != null;
+
+  QuizResult get result => QuizResult(
+    totalQuestions: _questions.length,
+    correctCount: _correctCount,
+    score: _correctCount,
+    selectedAnswers: List<int?>.from(_selectedAnswers),
+    questions: List<Question>.from(_questions),
+  );
 
   // sample questions (hardcoded for now)
   static final List<Question> sampleQuestions = [
@@ -79,7 +88,7 @@ class QuizProvider extends ChangeNotifier {
   void startQuiz() {
     _questions = sampleQuestions;
     _currentIndex = 0;
-    _score = 0;
+    _correctCount = 0;
     _selectedAnswers = List.filled(_questions.length, null);
     _secondsLeft = totalSeconds;
     _status = QuizStatus.active;
@@ -94,9 +103,23 @@ class QuizProvider extends ChangeNotifier {
     _selectedAnswers[_currentIndex] = answerIndex;
 
     if (answerIndex == currentQuestion.correctOptionIndex) {
-      _score += currentQuestion.difficulty * 10;
+      _correctCount ++;
     }
     notifyListeners();
+
+    Future.delayed(const Duration(seconds: 1), _advance);
+  }
+
+  void _advance() {
+    if (isLastQuestion) {
+      _status = QuizStatus.finished;
+      _cancelTimer();
+      notifyListeners();
+    } else {
+      _currentIndex++;
+      _startTimer();
+      notifyListeners();
+    }
   }
 
   void _startTimer() {
