@@ -47,6 +47,7 @@ dependencies:
 
   # for http requests
   http: ^1.6.0
+  dio: ^5.9.2
 
 dev_dependencies:
   flutter_test:

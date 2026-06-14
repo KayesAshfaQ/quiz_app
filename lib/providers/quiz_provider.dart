@@ -85,8 +85,8 @@ class QuizProvider extends ChangeNotifier {
     ),
   ];
 
-  void startQuiz() {
-    _questions = sampleQuestions;
+  void startQuiz(List<Question>? questions) {
+    _questions = questions ?? sampleQuestions;
     _currentIndex = 0;
     _correctCount = 0;
     _selectedAnswers = List.filled(_questions.length, null);

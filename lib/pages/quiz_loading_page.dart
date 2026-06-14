@@ -23,7 +23,7 @@ class _QuizLoadingPageState extends State<QuizLoadingPage> {
 
   void fetchQuestions() {
     setState(() {
-      _questionsFuture = _apiClient.fetchTdb();
+      _questionsFuture = _apiClient.fetchQuestions();
     });
   }
 

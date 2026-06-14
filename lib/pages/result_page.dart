@@ -232,7 +232,7 @@ class _ResultPageState extends State<ResultPage> {
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: () {
-                        context.read<QuizProvider>().startQuiz();
+                        context.read<QuizProvider>().startQuiz(null);
                         context.go(AppRoute.quizQuestion);
                       },
                       icon: const Icon(Icons.replay),

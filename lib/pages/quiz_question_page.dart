@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/providers/quiz_provider.dart';
-import 'package:quiz_app/services/api_client.dart';
 
 import '../app_route.dart';
 
@@ -22,7 +21,7 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      context.read<QuizProvider>().startQuiz();
+      context.read<QuizProvider>().startQuiz(widget.questions);
       print('${widget.questions.length} questions loaded into QuizProvider');
     });
   }
