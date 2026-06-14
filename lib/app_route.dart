@@ -1,15 +1,18 @@
 import 'package:go_router/go_router.dart';
+import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/models/quiz_result.dart';
 import 'package:quiz_app/pages/result_page.dart';
 import 'package:quiz_app/pages/scoreboard_page.dart';
 
 import 'pages/home_page.dart';
+import 'pages/quiz_loading_page.dart';
 import 'pages/quiz_management_page.dart';
 import 'pages/quiz_question_page.dart';
 
 class AppRoute {
   static const String home = '/home';
   static const String quizQuestion = '/quiz-question';
+  static const String quizLoading = '/quiz-loading';
   static const String quizManagement = '/quiz-management';
   static const String quizResult = '/quiz-result';
   static const String scoreboard = '/scoreboard';
@@ -20,7 +23,12 @@ class AppRoute {
       GoRoute(path: home, builder: (context, state) => HomePage()),
       GoRoute(
         path: quizQuestion,
-        builder: (context, state) => QuizQuestionPage(),
+        builder: (context, state) =>
+            QuizQuestionPage(questions: state.extra as List<Question>),
+      ),
+      GoRoute(
+        path: quizLoading,
+        builder: (context, state) => QuizLoadingPage(),
       ),
       GoRoute(
         path: quizManagement,

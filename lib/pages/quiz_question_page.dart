@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/providers/quiz_provider.dart';
+import 'package:quiz_app/services/api_client.dart';
 
 import '../app_route.dart';
 
 class QuizQuestionPage extends StatefulWidget {
-  const QuizQuestionPage({super.key});
+  final List<Question> questions;
+
+  const QuizQuestionPage({super.key, required this.questions});
 
   @override
   State<QuizQuestionPage> createState() => _QuizQuestionPageState();
@@ -17,8 +21,9 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<QuizProvider>().startQuiz();
+      print('${widget.questions.length} questions loaded into QuizProvider');
     });
   }
 
@@ -28,7 +33,6 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
 
     return Consumer<QuizProvider>(
       builder: (context, quiz, _) {
-
         if (quiz.status == QuizStatus.finished) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {

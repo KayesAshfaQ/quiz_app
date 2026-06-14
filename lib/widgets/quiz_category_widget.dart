@@ -16,7 +16,7 @@ class QuizCategoryWidget extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: () {
-          context.push(AppRoute.quizQuestion);
+          context.push(AppRoute.quizLoading);
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
