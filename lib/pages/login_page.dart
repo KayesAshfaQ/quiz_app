@@ -57,6 +57,7 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: _onPressedLogin,
                   child: const Text('Login'),
                 ),
+                SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
                     // Navigate to signup page
@@ -66,6 +67,19 @@ class _LoginPageState extends State<LoginPage> {
                       ? CircularProgressIndicator()
                       : const Text('Don\'t have an account? Sign Up'),
                 ),
+
+                 SizedBox(height: 16),
+
+                 // button to sigin in with Google
+                  ElevatedButton(
+                    onPressed: () {
+                      // Call Google sign-in logic here, e.g. using AuthProvider
+                      context.read<AuthProvider>().loginWithGoogle();
+                    },
+                    child: authProvider.isLoading
+                        ? CircularProgressIndicator()
+                        : const Text('Sign in with Google'),
+                  ),
               ],
             ),
           ),

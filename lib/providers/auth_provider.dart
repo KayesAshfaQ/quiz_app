@@ -51,6 +51,24 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> loginWithGoogle() async {
+    _setLoading(true);
+    try {
+      final credentials = await _authService.loginWithGoogle();
+      _user = User(
+        uid: credentials?.user?.uid ?? '',
+        email: credentials?.user?.email ?? '',
+      );
+
+      debugPrint('User logged in with Google: ${_user?.uid}');
+      _setErrorMessage(null);
+    } catch (e) {
+      _setErrorMessage(e.toString());
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<void> logout() async {
     _setLoading(true);
     try {
