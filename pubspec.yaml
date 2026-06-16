@@ -49,6 +49,9 @@ dependencies:
   http: ^1.6.0
   dio: ^5.9.2
 
+  # firebase
+  firebase_core: ^4.10.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

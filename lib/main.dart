@@ -1,7 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/firebase_options.dart';
 import 'package:quiz_app/models/scoreboard_entry.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
 import 'package:quiz_app/services/hive_storage_service.dart';
@@ -11,6 +13,8 @@ import 'providers/quiz_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await Hive.initFlutter();
   Hive.registerAdapter(ScoreboardEntryAdapter());
