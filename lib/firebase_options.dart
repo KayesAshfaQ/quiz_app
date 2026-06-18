@@ -62,13 +62,14 @@ class DefaultFirebaseOptions {
     projectId: 'quiz-app-bdapps',
     storageBucket: 'quiz-app-bdapps.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBCsS7-Q-iQo6lsuxyqKIjORqmEMLLaekk',
     appId: '1:388385014884:ios:bc3e0f29d3f035c1d00b71',
     messagingSenderId: '388385014884',
     projectId: 'quiz-app-bdapps',
     storageBucket: 'quiz-app-bdapps.firebasestorage.app',
+    androidClientId: '388385014884-gbg532f5p6ggt7d32t9pc6cggpqqsims.apps.googleusercontent.com',
+    iosClientId: '388385014884-omls3g3c2pqmsuvseue45j1fhsjf4knq.apps.googleusercontent.com',
     iosBundleId: 'com.example.quizApp',
   );
 }

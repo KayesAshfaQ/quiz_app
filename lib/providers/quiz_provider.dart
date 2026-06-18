@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/models/quiz_result.dart';
+import 'package:quiz_app/services/firestore_service.dart';
 
 enum QuizStatus { idle, active, finished }
 
@@ -152,6 +154,13 @@ class QuizProvider extends ChangeNotifier {
     _status = QuizStatus.idle;
     notifyListeners();
   }
+
+  void saveResult() {
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+    FirestoreService().saveQuizResult(userId, result);
+  }
+
+  
 
   @override
   void dispose() {
