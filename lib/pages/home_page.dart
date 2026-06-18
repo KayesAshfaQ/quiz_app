@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import 'package:quiz_app/models/quiz_category.dart';
 import '../app_route.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/category_type_widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -127,6 +129,13 @@ class _HomePageState extends State<HomePage> {
               tooltip: 'Scoreboard',
               onPressed: () {
                 context.push(AppRoute.scoreboard);
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Logout',
+              onPressed: () {
+                context.read<AuthProvider>().logout();
               },
             ),
           ],

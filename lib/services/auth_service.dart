@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
@@ -63,12 +64,13 @@ class AuthService {
 
       return userCredential;
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
       rethrow;
     }
   }
 
   Future<void> logout() async {
+    await _googleSignIn.signOut();
     await _auth.signOut();
   }
 }

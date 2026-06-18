@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/models/quiz_result.dart';
@@ -10,6 +11,7 @@ import 'pages/home_page.dart';
 import 'pages/quiz_loading_page.dart';
 import 'pages/quiz_management_page.dart';
 import 'pages/quiz_question_page.dart';
+import 'utils/go_route_refresh_stream.dart';
 
 class AppRoute {
   static const String login = '/login';
@@ -23,6 +25,22 @@ class AppRoute {
 
   static final routes = GoRouter(
     initialLocation: login,
+    refreshListenable: GoRouteRefreshStream(
+      FirebaseAuth.instance.authStateChanges(),
+    ),
+    redirect: (context, state) {
+
+      final isLoggedIn = FirebaseAuth.instance.currentUser != null;
+      final isLoginRoute = state.matchedLocation == login || state.matchedLocation == signup;
+
+      if (!isLoggedIn && !isLoginRoute) {
+        return login;
+      } else if (isLoggedIn && isLoginRoute) {
+        return home;
+      }
+      return null;
+
+    },
     routes: [
       GoRoute(path: home, builder: (context, state) => HomePage()),
       GoRoute(path: login, builder: (context, state) => LoginPage()),

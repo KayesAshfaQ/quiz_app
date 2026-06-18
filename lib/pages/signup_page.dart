@@ -34,11 +34,7 @@ class _SignupPageState extends State<SignupPage> {
               context,
             ).showSnackBar(SnackBar(content: Text(authProvider.errorMessage!)));
           });
-        } else if (authProvider.user != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.go(AppRoute.home);
-          });
-        }
+        } 
 
         return Scaffold(
           appBar: AppBar(title: const Text('Sign Up')),
