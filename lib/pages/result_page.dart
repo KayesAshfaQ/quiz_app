@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/app_route.dart';
 
@@ -9,6 +10,7 @@ import 'package:quiz_app/models/scoreboard_entry.dart';
 import 'package:quiz_app/providers/quiz_provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
 import 'package:quiz_app/widgets/score_circle.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ResultPage extends StatefulWidget {
   final QuizResult result;
@@ -73,8 +75,18 @@ class _ResultPageState extends State<ResultPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
           children: [
-            Icon(scoreIcon, color: scoreColor, size: 48),
-            const SizedBox(height: 12),
+            Center(
+              child: Transform.scale(
+                scale: 1.5,
+                child: Lottie.network(
+                  'https://lottie.host/62f15475-3f56-4f84-8906-116af7888159/5e016EA2YU.json',
+                  width: 100,
+                  height: 100,
+                  repeat: false,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
             Center(
               child: Text(
                 scoreLabel,
@@ -112,6 +124,10 @@ class _ResultPageState extends State<ResultPage> {
                   color: Colors.grey,
                 ),
               ],
+            ),
+            TextButton(
+              onPressed: _shareScore,
+              child: const Text('Share your score'),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
@@ -250,6 +266,15 @@ class _ResultPageState extends State<ResultPage> {
 
   int get _skippedCount =>
       widget.result.selectedAnswers.where((a) => a == null).length;
+
+  void _shareScore() {
+    SharePlus.instance.share(
+      ShareParams(
+        text:
+            'check out my quiz score: ${widget.result.score}/${widget.result.totalQuestions} in category "${widget.result.categoryName}"! Can you beat me?',
+      ),
+    );
+  }
 }
 
 class _StatPill extends StatelessWidget {
