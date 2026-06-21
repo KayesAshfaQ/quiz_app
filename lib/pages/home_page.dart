@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
-import 'package:quiz_app/models/quiz_category.dart';
-import '../app_route.dart';
-import '../providers/auth_provider.dart';
-import '../widgets/category_type_widget.dart';
+import 'package:quiz_app/pages/profile_page.dart';
+import 'package:quiz_app/pages/scoreboard_page.dart';
+import 'category_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,145 +12,28 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<QuizCategory> categories = [
-    QuizCategory(
-      name: 'Mathematics',
-      questionCount: 10,
-      icon: Icons.calculate,
-      color: Colors.blue,
-    ),
-    QuizCategory(
-      name: 'Science & Nature',
-      questionCount: 13,
-      icon: Icons.science,
-      color: Colors.green,
-    ),
-    QuizCategory(
-      name: 'History',
-      questionCount: 12,
-      icon: Icons.history,
-      color: Colors.orange,
-    ),
-    QuizCategory(
-      name: 'Geography',
-      questionCount: 11,
-      icon: Icons.map,
-      color: Colors.purple,
-    ),
-    QuizCategory(
-      name: 'Sports',
-      questionCount: 14,
-      icon: Icons.sports_soccer,
-      color: Colors.red,
-    ),
-    QuizCategory(
-      name: 'Entertainment',
-      questionCount: 15,
-      icon: Icons.movie,
-      color: Colors.pink,
-    ),
-    QuizCategory(
-      name: 'Art & Literature',
-      questionCount: 16,
-      icon: Icons.art_track,
-      color: Colors.indigo,
-    ),
-    QuizCategory(
-      name: 'Technology',
-      questionCount: 17,
-      icon: Icons.computer,
-      color: Colors.teal,
-    ),
-    QuizCategory(
-      name: 'Music',
-      questionCount: 18,
-      icon: Icons.music_note,
-      color: Colors.yellow,
-    ),
-    QuizCategory(
-      name: 'General Knowledge',
-      questionCount: 19,
-      icon: Icons.question_answer,
-      color: Colors.brown,
-    ),
-  ];
+  int _currentIndex = 0;
 
-  List<QuizCategory> _filterCategories(String type) {
-    switch (type) {
-      case 'Popular':
-        return categories
-            .where(
-              (c) => [
-                'Science & Nature',
-                'History',
-                'Sports',
-                'Entertainment',
-              ].contains(c.name),
-            )
-            .toList();
-      case 'New':
-        return categories
-            .where(
-              (c) => [
-                'Art & Literature',
-                'Technology',
-                'Music',
-                'General Knowledge',
-              ].contains(c.name),
-            )
-            .toList();
-      default:
-        return categories;
-    }
-  }
+  final List<Widget> _pages = [CategoryPage(), ScoreboardPage(), ProfilePage()];
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text('Quiz Categories'),
-          automaticallyImplyActions: true,
-          bottom: TabBar(
-            tabs: [
-              Tab(text: 'All', icon: Icon(Icons.list)),
-              Tab(text: 'Popular', icon: Icon(Icons.star)),
-              Tab(text: 'New', icon: Icon(Icons.new_releases)),
-            ],
+    return Scaffold(
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: (value) => {
+          setState(() {
+            _currentIndex = value;
+          }),
+        },
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.leaderboard),
+            label: 'Leaderboard',
           ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.leaderboard),
-              tooltip: 'Scoreboard',
-              onPressed: () {
-                context.push(AppRoute.scoreboard);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.logout),
-              tooltip: 'Logout',
-              onPressed: () {
-                context.read<AuthProvider>().logout();
-              },
-            ),
-          ],
-        ),
-        body: TabBarView(
-          children: [
-            CategoryTypeWidget(categories: categories),
-            CategoryTypeWidget(categories: _filterCategories('Popular')),
-            CategoryTypeWidget(categories: _filterCategories('New')),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          tooltip: 'Manage Quizzes',
-          child: const Icon(Icons.add),
-          onPressed: () {
-            context.push(AppRoute.quizManagement);
-          },
-        ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
       ),
     );
   }

@@ -8,6 +8,7 @@ import 'package:quiz_app/pages/scoreboard_page.dart';
 import 'package:quiz_app/pages/signup_page.dart';
 
 import 'pages/home_page.dart';
+import 'pages/profile_page.dart';
 import 'pages/quiz_loading_page.dart';
 import 'pages/quiz_management_page.dart';
 import 'pages/quiz_question_page.dart';
@@ -22,6 +23,7 @@ class AppRoute {
   static const String quizManagement = '/quiz-management';
   static const String quizResult = '/quiz-result';
   static const String scoreboard = '/scoreboard';
+  static const String profile = '/profile';
 
   static final routes = GoRouter(
     initialLocation: login,
@@ -29,9 +31,9 @@ class AppRoute {
       FirebaseAuth.instance.authStateChanges(),
     ),
     redirect: (context, state) {
-
       final isLoggedIn = FirebaseAuth.instance.currentUser != null;
-      final isLoginRoute = state.matchedLocation == login || state.matchedLocation == signup;
+      final isLoginRoute =
+          state.matchedLocation == login || state.matchedLocation == signup;
 
       if (!isLoggedIn && !isLoginRoute) {
         return login;
@@ -39,7 +41,6 @@ class AppRoute {
         return home;
       }
       return null;
-
     },
     routes: [
       GoRoute(path: home, builder: (context, state) => HomePage()),
@@ -68,6 +69,10 @@ class AppRoute {
       GoRoute(
         path: AppRoute.scoreboard,
         builder: (context, state) => ScoreboardPage(),
+      ),
+      GoRoute(
+        path: AppRoute.profile,
+        builder: (context, state) => ProfilePage(),
       ),
     ],
   );
