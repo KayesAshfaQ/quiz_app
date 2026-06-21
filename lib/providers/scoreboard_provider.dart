@@ -31,12 +31,12 @@ class ScoreboardProvider extends ChangeNotifier {
   Future<void> addEntry(ScoreboardEntry entry) async {
     try {
       await _storageService.saveScoreEntry(entry);
-      
+
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId != null) {
         await FirestoreService().saveScoreboardEntry(userId, entry);
       }
-      
+
       await loadHistory();
     } catch (e) {
       debugPrint('Error saving scoreboard entry: $e');
@@ -53,9 +53,20 @@ class ScoreboardProvider extends ChangeNotifier {
     }
   }
 
+  Future<List<ScoreboardEntry>> loadAllUserResults() async {
+    try {
+      final results = await FirestoreService().getScoreboardEntries();
+      debugPrint('Loaded ${results.length} scoreboard entries for all users');
+      return results;
+    } catch (e) {
+      debugPrint('Error loading all user results: $e');
+      return [];
+    }
+  }
+
   Future<List<ScoreboardEntry>> loadResults() async {
     final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-    final results = await FirestoreService().getScoreboardEntries(userId);
+    final results = await FirestoreService().getScoreboardEntries(id: userId);
 
     debugPrint('Loaded ${results.length} scoreboard entries for user $userId');
     return results;

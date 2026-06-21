@@ -45,7 +45,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
           body: scoreboard.isLoading
               ? const Center(child: CircularProgressIndicator())
               : FutureBuilder<List<ScoreboardEntry>>(
-                  future: scoreboard.loadResults(),
+                  future: scoreboard.loadAllUserResults(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
