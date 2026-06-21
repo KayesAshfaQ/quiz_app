@@ -17,14 +17,32 @@ class QuizQuestionPage extends StatefulWidget {
 }
 
 class _QuizQuestionPageState extends State<QuizQuestionPage> {
+  late QuizProvider _quizProvider;
+
   @override
   void initState() {
     super.initState();
+    _quizProvider = context.read<QuizProvider>();
+    _quizProvider.addListener(_onQuizStatusChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      context.read<QuizProvider>().startQuiz(widget.questions);
+      _quizProvider.startQuiz(widget.questions);
       print('${widget.questions.length} questions loaded into QuizProvider');
     });
+  }
+
+  void _onQuizStatusChanged() {
+    if (_quizProvider.status == QuizStatus.finished) {
+      if (mounted) {
+        context.go(AppRoute.quizResult, extra: _quizProvider.result);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _quizProvider.removeListener(_onQuizStatusChanged);
+    super.dispose();
   }
 
   @override
@@ -33,15 +51,6 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
 
     return Consumer<QuizProvider>(
       builder: (context, quiz, _) {
-        if (quiz.status == QuizStatus.finished) {
-          context.read<QuizProvider>().saveResult();
-
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              context.go(AppRoute.quizResult, extra: quiz.result);
-            }
-          });
-        }
 
         if (quiz.questions.isEmpty) {
           return const Scaffold(
