@@ -26,13 +26,20 @@ class ScoreCircle extends StatelessWidget {
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              '${result.score}',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+            TweenAnimationBuilder<int>(
+              tween: IntTween(begin: 0, end: result.score),
+              duration: const Duration(seconds: 1),
+              curve: Curves.easeOut,
+              builder: (context, value, child) {
+                return Text(
+                  '$value',
+                  style: TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                );
+              },
             ),
             Text(
               'of ${result.totalQuestions}',
