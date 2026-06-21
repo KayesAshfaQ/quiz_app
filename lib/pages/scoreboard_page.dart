@@ -43,38 +43,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
           ),
           body: scoreboard.isLoading
               ? const Center(child: CircularProgressIndicator())
-              : history.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.leaderboard_outlined,
-                          size: 72,
-                          color: colorScheme.outline.withValues(alpha: 0.5),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'No Scores Recorded Yet',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Complete a quiz to record your score here and track your learning progress!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : // use future builder to load results from Firestore and display them here
-                FutureBuilder<List<QuizResult>>(
+              : FutureBuilder<List<QuizResult>>(
                   future: scoreboard.loadResults(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -88,6 +57,38 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
                       );
                     } else {
                       final history = snapshot.data ?? [];
+
+                      if (history.isEmpty) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.leaderboard_outlined,
+                                  size: 72,
+                                  color: colorScheme.outline.withValues(alpha: 0.5),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'No Scores Recorded Yet',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Complete a quiz to record your score here and track your learning progress!',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
 
                       // Display results here using ListView or similar widget
                       return ListView.separated(
