@@ -28,9 +28,15 @@ class QuizCategoryWidget extends StatelessWidget {
             children: [
               QuizCategoryIcon(icon: category.icon, color: category.color),
               SizedBox(height: 12),
-              Text(
-                category.name,
-                style: Theme.of(context).textTheme.titleSmall,
+              Hero(
+                tag: 'category-${category.name}',
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Text(
+                    category.name,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
               ),
               SizedBox(height: 4),
               Text('${category.questionCount} Questions'),

@@ -108,9 +108,24 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
                             ),
                           ],
                         ),
-                        Chip(
-                          label: Text('Easy'),
-                          backgroundColor: Colors.green.shade100,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Hero(
+                              tag: 'category-${quiz.categoryName}',
+                              child: Material(
+                                type: MaterialType.transparency,
+                                child: Text(
+                                  quiz.categoryName,
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                              ),
+                            ),
+                            Chip(
+                              label: Text('Easy'),
+                              backgroundColor: Colors.green.shade100,
+                            ),
+                          ],
                         ),
                         Text(
                           quiz.currentQuestion.text,

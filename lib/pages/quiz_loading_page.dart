@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:quiz_app/app_route.dart';
 import 'package:quiz_app/models/question.dart';
+import 'package:quiz_app/providers/quiz_provider.dart';
 import 'package:quiz_app/services/api_client.dart';
 
 class QuizLoadingPage extends StatefulWidget {
@@ -44,10 +46,21 @@ class _QuizLoadingPageState extends State<QuizLoadingPage> {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Loading quiz...'),
+                children: [
+                  Hero(
+                    tag: 'category-${context.read<QuizProvider>().categoryName}',
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: Text(
+                        context.read<QuizProvider>().categoryName,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  const Text('Loading quiz...'),
                 ],
               ),
             );
