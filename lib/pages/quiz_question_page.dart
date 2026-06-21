@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/providers/quiz_provider.dart';
-import 'package:quiz_app/services/firestore_service.dart';
 
 import '../app_route.dart';
 
