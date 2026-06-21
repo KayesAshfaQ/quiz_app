@@ -7,6 +7,8 @@ class QuizResult {
   final int score;
   final List<int?> selectedAnswers; // null = skipped / timed-out
   final List<Question> questions;
+  final String categoryName;
+  final DateTime timestamp;
 
   const QuizResult({
     this.id,
@@ -15,6 +17,8 @@ class QuizResult {
     required this.score,
     required this.selectedAnswers,
     required this.questions,
+    required this.categoryName,
+    required this.timestamp,
   });
 
   double get accuracy =>
@@ -26,6 +30,8 @@ class QuizResult {
       'correctCount': correctCount,
       'score': score,
       'selectedAnswers': selectedAnswers,
+      'categoryName': categoryName,
+      'timestamp': timestamp,
     };
   }
 
@@ -37,6 +43,8 @@ class QuizResult {
       score: data['score'] ?? 0,
       selectedAnswers: List<int?>.from(data['selectedAnswers'] ?? []),
       questions: [], // questions are not stored in Firestore
+      categoryName: data['categoryName'] as String? ?? 'General Knowledge',
+      timestamp: data['timestamp'] != null ? data['timestamp'].toDate() : DateTime.now(),
     );
   }
 }

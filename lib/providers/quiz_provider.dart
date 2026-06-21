@@ -16,6 +16,8 @@ class QuizProvider extends ChangeNotifier {
   int _secondsLeft = totalSeconds;
   QuizStatus _status = QuizStatus.idle;
   Timer? _timer;
+  String _categoryName = 'General Knowledge';
+  DateTime _startTime = DateTime.now();
 
   List<Question> get questions => _questions;
   int get currentIndex => _currentIndex;
@@ -23,6 +25,8 @@ class QuizProvider extends ChangeNotifier {
   int get score => _correctCount;
   int get secondsLeft => _secondsLeft;
   QuizStatus get status => _status;
+  String get categoryName => _categoryName;
+  DateTime get startTime => _startTime;
 
   Question get currentQuestion => _questions[_currentIndex];
 
@@ -32,12 +36,19 @@ class QuizProvider extends ChangeNotifier {
 
   bool get hasAnswered => currentAnswer != null;
 
+  void setCategoryName(String name) {
+    _categoryName = name;
+    notifyListeners();
+  }
+
   QuizResult get result => QuizResult(
     totalQuestions: _questions.length,
     correctCount: _correctCount,
     score: _correctCount,
     selectedAnswers: List<int?>.from(_selectedAnswers),
     questions: List<Question>.from(_questions),
+    categoryName: _categoryName,
+    timestamp: _startTime,
   );
 
   // sample questions (hardcoded for now)
@@ -92,6 +103,7 @@ class QuizProvider extends ChangeNotifier {
     _selectedAnswers = List.filled(_questions.length, null);
     _secondsLeft = totalSeconds;
     _status = QuizStatus.active;
+    _startTime = DateTime.now();
     _startTimer();
     notifyListeners();
   }

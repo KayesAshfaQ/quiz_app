@@ -30,10 +30,10 @@ class _ResultPageState extends State<ResultPage> {
 
       final entry = ScoreboardEntry(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        categoryName: '',
+        categoryName: widget.result.categoryName,
         correctCount: widget.result.correctCount,
         totalQuestions: widget.result.totalQuestions,
-        timestamp: DateTime.now(),
+        timestamp: widget.result.timestamp,
       );
       scoreboard.addEntry(entry);
     });

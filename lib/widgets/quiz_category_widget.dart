@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quiz_app/providers/quiz_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quiz_app/app_route.dart';
 
@@ -16,6 +18,7 @@ class QuizCategoryWidget extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: () {
+          context.read<QuizProvider>().setCategoryName(category.name);
           context.push(AppRoute.quizLoading);
         },
         child: Padding(
