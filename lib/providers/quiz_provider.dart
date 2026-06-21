@@ -1,10 +1,8 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/models/quiz_result.dart';
-import 'package:quiz_app/services/firestore_service.dart';
 
 enum QuizStatus { idle, active, finished }
 
@@ -16,7 +14,7 @@ class QuizProvider extends ChangeNotifier {
   List<int?> _selectedAnswers = [];
   int _correctCount = 0;
   int _secondsLeft = totalSeconds;
-  QuizStatus _status = .idle;
+  QuizStatus _status = QuizStatus.idle;
   Timer? _timer;
 
   List<Question> get questions => _questions;
@@ -116,7 +114,6 @@ class QuizProvider extends ChangeNotifier {
     if (isLastQuestion) {
       _status = QuizStatus.finished;
       _cancelTimer();
-      saveResult(); // Call saveResult here in the business logic layer
       notifyListeners();
     } else {
       _currentIndex++;
@@ -155,13 +152,6 @@ class QuizProvider extends ChangeNotifier {
     _status = QuizStatus.idle;
     notifyListeners();
   }
-
-  Future<void> saveResult() async{
-    final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-    await FirestoreService().saveQuizResult(userId, result);
-  }
-
-  
 
   @override
   void dispose() {

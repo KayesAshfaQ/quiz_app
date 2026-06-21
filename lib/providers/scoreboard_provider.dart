@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:quiz_app/models/quiz_result.dart';
 import 'package:quiz_app/models/scoreboard_entry.dart';
 import 'package:quiz_app/services/hive_storage_service.dart';
 
@@ -32,6 +31,12 @@ class ScoreboardProvider extends ChangeNotifier {
   Future<void> addEntry(ScoreboardEntry entry) async {
     try {
       await _storageService.saveScoreEntry(entry);
+      
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId != null) {
+        await FirestoreService().saveScoreboardEntry(userId, entry);
+      }
+      
       await loadHistory();
     } catch (e) {
       debugPrint('Error saving scoreboard entry: $e');
@@ -48,21 +53,21 @@ class ScoreboardProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<QuizResult>> loadResults() async {
+  Future<List<ScoreboardEntry>> loadResults() async {
     final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-    final results = await FirestoreService().getQuizResults(userId);
+    final results = await FirestoreService().getScoreboardEntries(userId);
 
-    debugPrint('Loaded ${results.length} quiz results for user $userId');
+    debugPrint('Loaded ${results.length} scoreboard entries for user $userId');
     return results;
   }
 
   Future<void> deleteResult(String resultId) async {
     final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
     try {
-      await FirestoreService().deleteQuizResult(userId, resultId);
+      await FirestoreService().deleteScoreboardEntry(userId, resultId);
       await loadHistory(); // Refresh local history after deletion
     } catch (e) {
-      debugPrint('Error deleting quiz result: $e');
+      debugPrint('Error deleting scoreboard entry: $e');
     }
   }
 }

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../models/quiz_result.dart';
+import '../models/scoreboard_entry.dart';
 
 class FirestoreService {
   final FirebaseFirestore _firestore;
@@ -8,15 +8,16 @@ class FirestoreService {
   FirestoreService({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  Future<void> saveQuizResult(String userId, QuizResult quizResult) async {
+  Future<void> saveScoreboardEntry(String userId, ScoreboardEntry entry) async {
     await _firestore
         .collection('users')
         .doc(userId)
         .collection('scores')
-        .add(quizResult.toFirestore());
+        .doc(entry.id)
+        .set(entry.toFirestore());
   }
 
-  Future<List<QuizResult>> getQuizResults(String userId) async {
+  Future<List<ScoreboardEntry>> getScoreboardEntries(String userId) async {
     final snapshot = await _firestore
         .collection('users')
         .doc(userId)
@@ -27,14 +28,14 @@ class FirestoreService {
     return snapshot.docs.map((doc) {
       final data = doc.data();
       data['id'] = doc.id; // Include document ID in the data
-      return QuizResult.fromFirestore(data);
+      return ScoreboardEntry.fromFirestore(data);
     }).toList();
   }
 
-  Future<void> updateQuizResult(
+  Future<void> updateScoreboardEntry(
     String userId,
     String resultId,
-    QuizResult updatedResult,
+    ScoreboardEntry updatedResult,
   ) async {
     await _firestore
         .collection('users')
@@ -44,7 +45,7 @@ class FirestoreService {
         .update(updatedResult.toFirestore());
   }
 
-  Future<void> deleteQuizResult(String userId, String resultId) async {
+  Future<void> deleteScoreboardEntry(String userId, String resultId) async {
     await _firestore
         .collection('users')
         .doc(userId)

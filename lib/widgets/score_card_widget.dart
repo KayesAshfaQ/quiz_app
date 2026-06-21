@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quiz_app/models/quiz_result.dart';
+import 'package:quiz_app/models/scoreboard_entry.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
 
 class ScoreCardWidget extends StatelessWidget {
   const ScoreCardWidget({super.key, required this.entry});
 
-  final QuizResult entry;
+  final ScoreboardEntry entry;
+
+  String _formatDate(DateTime dt) {
+    final year = dt.year;
+    final month = dt.month.toString().padLeft(2, '0');
+    final day = dt.day.toString().padLeft(2, '0');
+    final hour = dt.hour.toString().padLeft(2, '0');
+    final minute = dt.minute.toString().padLeft(2, '0');
+    return '$year-$month-$day $hour:$minute';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +31,7 @@ class ScoreCardWidget extends StatelessWidget {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       onDismissed: (direction) {
-        if (entry.id != null) {
-          context.read<ScoreboardProvider>().deleteResult(entry.id!);
-        }
+        context.read<ScoreboardProvider>().deleteResult(entry.id);
       },
       child: Card(
         elevation: 1,
@@ -55,7 +62,7 @@ class ScoreCardWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'entry.categoryName',
+                      entry.categoryName.isEmpty ? 'General Knowledge' : entry.categoryName,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -63,7 +70,7 @@ class ScoreCardWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '_formatDate(entry.timestamp)',
+                      _formatDate(entry.timestamp),
                       style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                     const SizedBox(height: 6),

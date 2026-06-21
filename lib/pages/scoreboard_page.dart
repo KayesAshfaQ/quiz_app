@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
+import 'package:quiz_app/models/scoreboard_entry.dart';
 
 import '../app_route.dart';
-import '../models/quiz_result.dart';
 import '../widgets/score_card_widget.dart';
 
 class ScoreboardPage extends StatefulWidget {
@@ -44,7 +44,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
           ),
           body: scoreboard.isLoading
               ? const Center(child: CircularProgressIndicator())
-              : FutureBuilder<List<QuizResult>>(
+              : FutureBuilder<List<ScoreboardEntry>>(
                   future: scoreboard.loadResults(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -112,12 +112,4 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
     );
   }
 
-  String _formatDate(DateTime dt) {
-    final year = dt.year;
-    final month = dt.month.toString().padLeft(2, '0');
-    final day = dt.day.toString().padLeft(2, '0');
-    final hour = dt.hour.toString().padLeft(2, '0');
-    final minute = dt.minute.toString().padLeft(2, '0');
-    return '$year-$month-$day $hour:$minute';
-  }
 }

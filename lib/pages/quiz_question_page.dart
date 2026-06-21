@@ -26,7 +26,9 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _quizProvider.startQuiz(widget.questions);
-      print('${widget.questions.length} questions loaded into QuizProvider');
+      debugPrint(
+        '${widget.questions.length} questions loaded into QuizProvider',
+      );
     });
   }
 
@@ -50,7 +52,6 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
 
     return Consumer<QuizProvider>(
       builder: (context, quiz, _) {
-
         if (quiz.questions.isEmpty) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),

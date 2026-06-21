@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
 
 part 'scoreboard_entry.g.dart';
@@ -28,4 +29,24 @@ class ScoreboardEntry extends HiveObject {
   });
 
   double get accuracy => totalQuestions == 0 ? 0.0 : correctCount / totalQuestions;
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'id': id,
+      'categoryName': categoryName,
+      'correctCount': correctCount,
+      'totalQuestions': totalQuestions,
+      'timestamp': timestamp,
+    };
+  }
+
+  factory ScoreboardEntry.fromFirestore(Map<String, dynamic> data) {
+    return ScoreboardEntry(
+      id: data['id'] as String? ?? '',
+      categoryName: data['categoryName'] as String? ?? '',
+      correctCount: data['correctCount'] as int? ?? 0,
+      totalQuestions: data['totalQuestions'] as int? ?? 0,
+      timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    );
+  }
 }
