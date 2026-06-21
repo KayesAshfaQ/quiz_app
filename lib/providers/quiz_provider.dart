@@ -116,6 +116,7 @@ class QuizProvider extends ChangeNotifier {
     if (isLastQuestion) {
       _status = QuizStatus.finished;
       _cancelTimer();
+      saveResult(); // Call saveResult here in the business logic layer
       notifyListeners();
     } else {
       _currentIndex++;
@@ -155,9 +156,9 @@ class QuizProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void saveResult() {
+  Future<void> saveResult() async{
     final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-    FirestoreService().saveQuizResult(userId, result);
+    await FirestoreService().saveQuizResult(userId, result);
   }
 
   
