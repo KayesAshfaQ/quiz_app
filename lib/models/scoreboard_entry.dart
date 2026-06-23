@@ -20,12 +20,20 @@ class ScoreboardEntry extends HiveObject {
   @HiveField(4)
   final DateTime timestamp;
 
+  @HiveField(5)
+  final String? userId;
+
+  @HiveField(6)
+  final String? displayName;
+
   ScoreboardEntry({
     required this.id,
     required this.categoryName,
     required this.correctCount,
     required this.totalQuestions,
     required this.timestamp,
+    this.userId,
+    this.displayName,
   });
 
   double get accuracy => totalQuestions == 0 ? 0.0 : correctCount / totalQuestions;
@@ -37,6 +45,8 @@ class ScoreboardEntry extends HiveObject {
       'correctCount': correctCount,
       'totalQuestions': totalQuestions,
       'timestamp': timestamp,
+      'userId': userId,
+      'displayName': displayName,
     };
   }
 
@@ -47,6 +57,8 @@ class ScoreboardEntry extends HiveObject {
       correctCount: data['correctCount'] as int? ?? 0,
       totalQuestions: data['totalQuestions'] as int? ?? 0,
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      userId: data['userId'] as String? ?? '',
+      displayName: data['displayName'] as String? ?? 'Unknown',
     );
   }
 }

@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
@@ -29,6 +30,7 @@ class _ResultPageState extends State<ResultPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // final quiz = context.read<QuizProvider>();
       final scoreboard = context.read<ScoreboardProvider>();
+      final currentUser = FirebaseAuth.instance.currentUser;
 
       final entry = ScoreboardEntry(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -36,6 +38,8 @@ class _ResultPageState extends State<ResultPage> {
         correctCount: widget.result.correctCount,
         totalQuestions: widget.result.totalQuestions,
         timestamp: widget.result.timestamp,
+        userId: currentUser?.uid ?? 'anonymous',
+        displayName: currentUser?.displayName ?? 'Anonymous',
       );
       scoreboard.addEntry(entry);
     });

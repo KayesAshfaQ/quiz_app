@@ -61,7 +61,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
             Expanded(
               child: FutureBuilder<List<ScoreboardEntry>>(
-                future: context.read<ScoreboardProvider>().loadResults(),
+                future: context.read<ScoreboardProvider>().loadPersonalResults(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

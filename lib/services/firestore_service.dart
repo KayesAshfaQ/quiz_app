@@ -9,27 +9,36 @@ class FirestoreService {
   FirestoreService({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  Future<void> saveScoreboardEntry(String userId, ScoreboardEntry entry) async {
+  Future<void> saveScoreboardEntry(ScoreboardEntry entry) async {
     await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('scores')
+        .collection('scoreboard')
         .doc(entry.id)
         .set(entry.toFirestore());
   }
 
-  Future<List<ScoreboardEntry>> getScoreboardEntries({String? id}) async {
-    final snapshot = id == null
-        ? await _firestore
-              .collectionGroup('scores')
-              /* .orderBy('timestamp', descending: true) */
-              .get()
-        : await _firestore
-              .collection('users')
-              .doc(id)
-              .collection('scores')
-              .orderBy('timestamp', descending: true)
-              .get();
+  Future<QuerySnapshot> getGlobalScoreboard(
+    DocumentSnapshot? startAfter,
+    int limit,
+  ) async {
+    Query query = _firestore
+        .collection('scoreboard')
+        .orderBy('correctCount', descending: true)
+        .orderBy('timestamp', descending: true)
+        .limit(limit);
+
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+
+    return await query.get();
+  }
+
+  Future<List<ScoreboardEntry>> getUserScoreboard(String userId) async {
+    final snapshot = await _firestore
+        .collection('scoreboard')
+        .where('userId', isEqualTo: userId)
+        .orderBy('timestamp', descending: true)
+        .get();
 
     return snapshot.docs.map((doc) {
       final data = doc.data();
@@ -38,26 +47,33 @@ class FirestoreService {
     }).toList();
   }
 
+  Future<int> getUserHighScore(String userId) async {
+    final snapshot = await _firestore
+        .collection('scoreboard')
+        .where('userId', isEqualTo: userId)
+        .orderBy('correctCount', descending: true)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final data = snapshot.docs.first.data();
+      return data['correctCount'] as int? ?? 0;
+    }
+    return 0;
+  }
+
   Future<void> updateScoreboardEntry(
-    String userId,
     String resultId,
     ScoreboardEntry updatedResult,
   ) async {
     await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('scores')
+        .collection('scoreboard')
         .doc(resultId)
         .update(updatedResult.toFirestore());
   }
 
-  Future<void> deleteScoreboardEntry(String userId, String resultId) async {
-    await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('scores')
-        .doc(resultId)
-        .delete();
+  Future<void> deleteScoreboardEntry(String resultId) async {
+    await _firestore.collection('scoreboard').doc(resultId).delete();
   }
 
   Future<void> saveUserProfile(User user) async {

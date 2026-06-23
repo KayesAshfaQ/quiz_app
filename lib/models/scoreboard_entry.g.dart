@@ -22,13 +22,15 @@ class ScoreboardEntryAdapter extends TypeAdapter<ScoreboardEntry> {
       correctCount: fields[2] as int,
       totalQuestions: fields[3] as int,
       timestamp: fields[4] as DateTime,
+      userId: fields[5] as String?,
+      displayName: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ScoreboardEntry obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +40,11 @@ class ScoreboardEntryAdapter extends TypeAdapter<ScoreboardEntry> {
       ..writeByte(3)
       ..write(obj.totalQuestions)
       ..writeByte(4)
-      ..write(obj.timestamp);
+      ..write(obj.timestamp)
+      ..writeByte(5)
+      ..write(obj.userId)
+      ..writeByte(6)
+      ..write(obj.displayName);
   }
 
   @override

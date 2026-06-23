@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/models/scoreboard_entry.dart';
@@ -8,22 +9,31 @@ import '../services/firestore_service.dart';
 class ScoreboardProvider extends ChangeNotifier {
   final HiveStorageService _storageService;
   List<ScoreboardEntry> _history = [];
-  bool _isLoading = false;
+  bool _isLoadingHistory = false;
+
+  List<ScoreboardEntry> _globalScores = [];
+  bool _isLoadingGlobalScores = false;
+  bool _hasMoreGlobalScores = true;
+  DocumentSnapshot? _lastDoc;
 
   ScoreboardProvider(this._storageService);
 
   List<ScoreboardEntry> get history => _history;
-  bool get isLoading => _isLoading;
+  bool get isLoading => _isLoadingHistory;
+
+  List<ScoreboardEntry> get globalScores => _globalScores;
+  bool get isLoadingGlobalScores => _isLoadingGlobalScores;
+  bool get hasMoreGlobalScores => _hasMoreGlobalScores;
 
   Future<void> loadHistory() async {
-    _isLoading = true;
+    _isLoadingHistory = true;
     notifyListeners();
     try {
       _history = await _storageService.getScoreHistory();
     } catch (e) {
       debugPrint('Error loading scoreboard history: $e');
     } finally {
-      _isLoading = false;
+      _isLoadingHistory = false;
       notifyListeners();
     }
   }
@@ -32,10 +42,7 @@ class ScoreboardProvider extends ChangeNotifier {
     try {
       await _storageService.saveScoreEntry(entry);
 
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId != null) {
-        await FirestoreService().saveScoreboardEntry(userId, entry);
-      }
+      await FirestoreService().saveScoreboardEntry(entry);
 
       await loadHistory();
     } catch (e) {
@@ -53,32 +60,71 @@ class ScoreboardProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<ScoreboardEntry>> loadAllUserResults() async {
+  Future<List<ScoreboardEntry>> loadPersonalResults() async {
     try {
-      final results = await FirestoreService().getScoreboardEntries();
-      debugPrint('Loaded ${results.length} scoreboard entries for all users');
+      final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+      final results = await FirestoreService().getUserScoreboard(userId);
+      debugPrint(
+        'Loaded ${results.length} scoreboard entries for user $userId',
+      );
       return results;
     } catch (e) {
-      debugPrint('Error loading all user results: $e');
+      debugPrint('Error loading personal results: $e');
       return [];
     }
   }
 
-  Future<List<ScoreboardEntry>> loadResults() async {
-    final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-    final results = await FirestoreService().getScoreboardEntries(id: userId);
+  Future<void> fetchNextGlobalPage({bool refresh = false}) async {
+    if (_isLoadingGlobalScores) return;
+    if (!refresh && !_hasMoreGlobalScores) return;
 
-    debugPrint('Loaded ${results.length} scoreboard entries for user $userId');
-    return results;
+    if (refresh) {
+      _globalScores.clear();
+      _lastDoc = null;
+      _hasMoreGlobalScores = true;
+    }
+
+    _isLoadingGlobalScores = true;
+    Future.microtask(() => notifyListeners());
+
+    try {
+      final snapshot = await FirestoreService().getGlobalScoreboard(
+        _lastDoc,
+        10,
+      );
+
+      if (snapshot.docs.isNotEmpty) {
+        _lastDoc = snapshot.docs.last;
+        final newEntry = snapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          data['id'] = doc.id; // Include document ID in the data
+          return ScoreboardEntry.fromFirestore(data);
+        }).toList();
+
+        _globalScores.addAll(newEntry);
+      }
+
+      if (snapshot.docs.length < 10) {
+        _hasMoreGlobalScores = false;
+      }
+    } catch (e) {
+      debugPrint('Error fetching global scoreboard: $e');
+    } finally {
+      _isLoadingGlobalScores = false;
+      notifyListeners();
+    }
   }
 
   Future<void> deleteResult(String resultId) async {
-    final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
     try {
-      await FirestoreService().deleteScoreboardEntry(userId, resultId);
+      await FirestoreService().deleteScoreboardEntry(resultId);
       await loadHistory(); // Refresh local history after deletion
     } catch (e) {
       debugPrint('Error deleting scoreboard entry: $e');
     }
+  }
+
+  Future<void> onRefreshGlobalScores() async {
+    await fetchNextGlobalPage(refresh: true);
   }
 }

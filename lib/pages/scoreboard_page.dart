@@ -15,6 +15,31 @@ class ScoreboardPage extends StatefulWidget {
 }
 
 class _ScoreboardPageState extends State<ScoreboardPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<ScoreboardProvider>().fetchNextGlobalPage();
+    });
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<ScoreboardProvider>().fetchNextGlobalPage();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -42,74 +67,84 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
                 ),
             ],
           ),
-          body: scoreboard.isLoading
+          body:
+              scoreboard.globalScores.isEmpty &&
+                  scoreboard.isLoadingGlobalScores
               ? const Center(child: CircularProgressIndicator())
-              : FutureBuilder<List<ScoreboardEntry>>(
-                  future: scoreboard.loadAllUserResults(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
+              : Builder(
+                  builder: (context) {
+                    final history = scoreboard.globalScores;
+
+                    if (history.isEmpty) {
                       return Center(
-                        child: Text(
-                          'Error loading results: ${snapshot.error}',
-                          style: const TextStyle(color: Colors.red),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.leaderboard_outlined,
+                                size: 72,
+                                color: colorScheme.outline.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'No Scores Recorded Yet',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Complete a quiz to record your score here and track your learning progress!',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  scoreboard.fetchNextGlobalPage(refresh: true);
+                                },
+                                child: const Text('Refresh'),
+                              ),
+                            ],
+                          ),
                         ),
                       );
-                    } else {
-                      final history = snapshot.data ?? [];
+                    }
 
-                      if (history.isEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.leaderboard_outlined,
-                                  size: 72,
-                                  color: colorScheme.outline.withValues(
-                                    alpha: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'No Scores Recorded Yet',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Complete a quiz to record your score here and track your learning progress!',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }
-
-                      // Display results here using ListView or similar widget
-                      return ListView.separated(
+                    // Display results here using ListView or similar widget
+                    return RefreshIndicator(
+                      onRefresh: () => scoreboard.onRefreshGlobalScores(),
+                      child: ListView.separated(
                         padding: const EdgeInsets.all(16),
-                        itemCount: history.length,
+                        itemCount:
+                            scoreboard.globalScores.length +
+                            (scoreboard.hasMoreGlobalScores ? 1 : 0),
                         separatorBuilder: (_, _) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
-                          final score = history[index];
+                          if (index >= scoreboard.globalScores.length) {
+                            // Show a loading indicator at the end of the list
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+
+                          final score = scoreboard.globalScores[index];
 
                           return ScoreCardWidget(entry: score);
                         },
-                      );
-                    }
+                      ),
+                    );
                   },
                 ),
         );
       },
     );
   }
-
 }
