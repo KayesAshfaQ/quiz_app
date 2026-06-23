@@ -52,12 +52,6 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
           appBar: AppBar(
             backgroundColor: colorScheme.inversePrimary,
             title: const Text('Scoreboard'),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                context.go(AppRoute.home);
-              },
-            ),
             actions: [
               if (history.isNotEmpty)
                 IconButton(
