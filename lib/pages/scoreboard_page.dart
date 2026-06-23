@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
-import 'package:quiz_app/models/scoreboard_entry.dart';
 
-import '../app_route.dart';
 import '../widgets/score_card_widget.dart';
 
 class ScoreboardPage extends StatefulWidget {
