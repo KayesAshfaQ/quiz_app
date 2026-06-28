@@ -58,13 +58,11 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
                 ),
             ],
           ),
-          body:
-              scoreboard.globalScores.isEmpty &&
-                  scoreboard.isLoadingGlobalScores
+          body: scoreboard.history.isEmpty && scoreboard.isLoading
               ? const Center(child: CircularProgressIndicator())
               : Builder(
                   builder: (context) {
-                    final history = scoreboard.globalScores;
+                    final history = scoreboard.history;
 
                     if (history.isEmpty) {
                       return Center(
@@ -112,11 +110,11 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
                       child: ListView.separated(
                         padding: const EdgeInsets.all(16),
                         itemCount:
-                            scoreboard.globalScores.length +
+                            scoreboard.history.length +
                             (scoreboard.hasMoreGlobalScores ? 1 : 0),
                         separatorBuilder: (_, _) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
-                          if (index >= scoreboard.globalScores.length) {
+                          if (index >= scoreboard.history.length) {
                             // Show a loading indicator at the end of the list
                             return const Center(
                               child: Padding(
@@ -126,7 +124,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
                             );
                           }
 
-                          final score = scoreboard.globalScores[index];
+                          final score = scoreboard.history[index];
 
                           return ScoreCardWidget(entry: score);
                         },

@@ -32,8 +32,7 @@ class QuizApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => QuizProvider()),
         ChangeNotifierProvider(
-          create: (_) =>
-              ScoreboardProvider(HiveStorageService())..loadHistory(),
+          create: (_) => ScoreboardProvider()..loadHistory(),
         ),
       ],
       child: MaterialApp.router(

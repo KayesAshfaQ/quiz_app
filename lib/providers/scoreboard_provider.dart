@@ -2,34 +2,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/models/scoreboard_entry.dart';
-import 'package:quiz_app/services/hive_storage_service.dart';
 
 import '../services/firestore_service.dart';
 
 class ScoreboardProvider extends ChangeNotifier {
-  final HiveStorageService _storageService;
-  List<ScoreboardEntry> _history = [];
+  final List<ScoreboardEntry> _history = [];
   bool _isLoadingHistory = false;
-
-  List<ScoreboardEntry> _globalScores = [];
-  bool _isLoadingGlobalScores = false;
   bool _hasMoreGlobalScores = true;
   DocumentSnapshot? _lastDoc;
 
-  ScoreboardProvider(this._storageService);
-
   List<ScoreboardEntry> get history => _history;
   bool get isLoading => _isLoadingHistory;
-
-  List<ScoreboardEntry> get globalScores => _globalScores;
-  bool get isLoadingGlobalScores => _isLoadingGlobalScores;
   bool get hasMoreGlobalScores => _hasMoreGlobalScores;
 
   Future<void> loadHistory() async {
     _isLoadingHistory = true;
     notifyListeners();
     try {
-      _history = await _storageService.getScoreHistory();
+      fetchNextGlobalPage();
     } catch (e) {
       debugPrint('Error loading scoreboard history: $e');
     } finally {
@@ -40,23 +30,11 @@ class ScoreboardProvider extends ChangeNotifier {
 
   Future<void> addEntry(ScoreboardEntry entry) async {
     try {
-      await _storageService.saveScoreEntry(entry);
-
       await FirestoreService().saveScoreboardEntry(entry);
 
       await loadHistory();
     } catch (e) {
       debugPrint('Error saving scoreboard entry: $e');
-    }
-  }
-
-  Future<void> clearHistory() async {
-    try {
-      await _storageService.clearScoreHistory();
-      _history = [];
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error clearing scoreboard history: $e');
     }
   }
 
@@ -75,16 +53,16 @@ class ScoreboardProvider extends ChangeNotifier {
   }
 
   Future<void> fetchNextGlobalPage({bool refresh = false}) async {
-    if (_isLoadingGlobalScores) return;
+    if (_isLoadingHistory) return;
     if (!refresh && !_hasMoreGlobalScores) return;
 
     if (refresh) {
-      _globalScores.clear();
+      _history.clear();
       _lastDoc = null;
       _hasMoreGlobalScores = true;
     }
 
-    _isLoadingGlobalScores = true;
+    _isLoadingHistory = true;
     Future.microtask(() => notifyListeners());
 
     try {
@@ -101,7 +79,7 @@ class ScoreboardProvider extends ChangeNotifier {
           return ScoreboardEntry.fromFirestore(data);
         }).toList();
 
-        _globalScores.addAll(newEntry);
+        _history.addAll(newEntry);
       }
 
       if (snapshot.docs.length < 10) {
@@ -110,7 +88,7 @@ class ScoreboardProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error fetching global scoreboard: $e');
     } finally {
-      _isLoadingGlobalScores = false;
+      _isLoadingHistory = false;
       notifyListeners();
     }
   }
