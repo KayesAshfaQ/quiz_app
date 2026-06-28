@@ -33,15 +33,27 @@ class FirestoreService {
     return await query.get();
   }
 
-  Future<List<ScoreboardEntry>> getUserScoreboard(String userId) async {
-    final snapshot = await _firestore
+  Future<List<ScoreboardEntry>> getUserScoreboard(String userId, {String filter = 'Monthly'}) async {
+    Query query = _firestore
         .collection('scoreboard')
-        .where('userId', isEqualTo: userId)
-        .orderBy('timestamp', descending: true)
-        .get();
+        .where('userId', isEqualTo: userId);
+
+    final now = DateTime.now();
+    if (filter == 'Daily') {
+      final start = DateTime(now.year, now.month, now.day);
+      query = query.where('timestamp', isGreaterThanOrEqualTo: start);
+    } else if (filter == 'Monthly') {
+      final start = DateTime(now.year, now.month, 1);
+      query = query.where('timestamp', isGreaterThanOrEqualTo: start);
+    } else if (filter == 'Yearly') {
+      final start = DateTime(now.year, 1, 1);
+      query = query.where('timestamp', isGreaterThanOrEqualTo: start);
+    }
+
+    final snapshot = await query.orderBy('timestamp', descending: true).get();
 
     return snapshot.docs.map((doc) {
-      final data = doc.data();
+      final data = doc.data() as Map<String, dynamic>;
       data['id'] = doc.id; // Include document ID in the data
       return ScoreboardEntry.fromFirestore(data);
     }).toList();

@@ -11,9 +11,23 @@ class ScoreboardProvider extends ChangeNotifier {
   bool _hasMoreGlobalScores = true;
   DocumentSnapshot? _lastDoc;
 
+  String _selectedFilter = 'Monthly';
+  final List<ScoreboardEntry> _personalHistory = [];
+  bool _isLoadingPersonalHistory = false;
+
   List<ScoreboardEntry> get history => _history;
   bool get isLoading => _isLoadingHistory;
   bool get hasMoreGlobalScores => _hasMoreGlobalScores;
+
+  String get selectedFilter => _selectedFilter;
+  set selectedFilter(String filter) {
+    _selectedFilter = filter;
+    notifyListeners();
+    loadPersonalResults();
+  }
+
+  List<ScoreboardEntry> get personalHistory => _personalHistory;
+  bool get isLoadingPersonalHistory => _isLoadingPersonalHistory;
 
   Future<void> loadHistory() async {
     _isLoadingHistory = true;
@@ -38,17 +52,26 @@ class ScoreboardProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<ScoreboardEntry>> loadPersonalResults() async {
+  Future<void> loadPersonalResults() async {
+    _isLoadingPersonalHistory = true;
+    notifyListeners();
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-      final results = await FirestoreService().getUserScoreboard(userId);
-      debugPrint(
-        'Loaded ${results.length} scoreboard entries for user $userId',
+      final results = await FirestoreService().getUserScoreboard(
+        userId,
+        filter: _selectedFilter,
       );
-      return results;
+      debugPrint(
+        'Loaded ${results.length} scoreboard entries for user $userId with filter $selectedFilter',
+      );
+      _personalHistory.clear();
+      _personalHistory.addAll(results);
+      notifyListeners();
     } catch (e) {
       debugPrint('Error loading personal results: $e');
-      return [];
+    } finally {
+      _isLoadingPersonalHistory = false;
+      notifyListeners();
     }
   }
 
