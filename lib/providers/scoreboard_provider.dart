@@ -35,8 +35,8 @@ class ScoreboardProvider extends ChangeNotifier {
   bool get isLoadingPersonalHistory => _isLoadingPersonalHistory;
 
   Future<void> loadHistory({bool refresh = false}) async {
-    _isLoadingHistory = true;
-    notifyListeners();
+    /* _isLoadingHistory = true;
+    notifyListeners(); */
     try {
       fetchNextGlobalPage(refresh: refresh);
     } catch (e) {
