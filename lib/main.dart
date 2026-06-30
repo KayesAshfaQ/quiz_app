@@ -6,7 +6,6 @@ import 'package:quiz_app/firebase_options.dart';
 import 'package:quiz_app/models/scoreboard_entry.dart';
 import 'package:quiz_app/providers/auth_provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
-import 'package:quiz_app/services/hive_storage_service.dart';
 
 import 'app_route.dart';
 import 'providers/quiz_provider.dart';

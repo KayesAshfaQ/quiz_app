@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
+import 'package:quiz_app/widgets/podium_widget.dart';
 
 import '../widgets/score_card_widget.dart';
 
@@ -60,77 +61,97 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
           ),
           body: scoreboard.history.isEmpty && scoreboard.isLoading
               ? const Center(child: CircularProgressIndicator())
-              : Builder(
-                  builder: (context) {
-                    final history = scoreboard.history;
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Builder(
+                    builder: (context) {
+                      final history = scoreboard.history;
 
-                    if (history.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.leaderboard_outlined,
-                                size: 72,
-                                color: colorScheme.outline.withValues(
-                                  alpha: 0.5,
+                      if (history.isEmpty) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.leaderboard_outlined,
+                                  size: 72,
+                                  color: colorScheme.outline.withValues(
+                                    alpha: 0.5,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'No Scores Recorded Yet',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'No Scores Recorded Yet',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Complete a quiz to record your score here and track your learning progress!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  scoreboard.fetchNextGlobalPage(refresh: true);
-                                },
-                                child: const Text('Refresh'),
-                              ),
-                            ],
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Complete a quiz to record your score here and track your learning progress!',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    scoreboard.fetchNextGlobalPage(
+                                      refresh: true,
+                                    );
+                                  },
+                                  child: const Text('Refresh'),
+                                ),
+                              ],
+                            ),
                           ),
+                        );
+                      }
+
+                      final top3 = history.take(3).toList();
+                      final remainingScores = history.skip(3).toList();
+
+                      // Display results here using ListView or similar widget
+                      return RefreshIndicator(
+                        onRefresh: () => scoreboard.onRefreshGlobalScores(),
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverToBoxAdapter(
+                              child: PodiumWidget(topUsers: top3),
+                            ),
+                            SliverPadding(
+                              padding: const EdgeInsets.only(top: 16),
+                              sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    if (index >= remainingScores.length) {
+                                      // Show a loading indicator at the end of the list
+                                      return const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    }
+
+                                    final score = remainingScores[index];
+
+                                    return ScoreCardWidget(entry: score);
+                                  },
+                                  childCount:
+                                      remainingScores.length +
+                                      (scoreboard.hasMoreGlobalScores ? 1 : 0),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       );
-                    }
-
-                    // Display results here using ListView or similar widget
-                    return RefreshIndicator(
-                      onRefresh: () => scoreboard.onRefreshGlobalScores(),
-                      child: ListView.separated(
-                        padding: const EdgeInsets.all(16),
-                        itemCount:
-                            scoreboard.history.length +
-                            (scoreboard.hasMoreGlobalScores ? 1 : 0),
-                        separatorBuilder: (_, _) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          if (index >= scoreboard.history.length) {
-                            // Show a loading indicator at the end of the list
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          }
-
-                          final score = scoreboard.history[index];
-
-                          return ScoreCardWidget(entry: score);
-                        },
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 ),
         );
       },
