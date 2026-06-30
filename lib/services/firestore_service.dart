@@ -18,13 +18,29 @@ class FirestoreService {
 
   Future<QuerySnapshot> getGlobalScoreboard(
     DocumentSnapshot? startAfter,
-    int limit,
-  ) async {
+    int limit, {
+    String filter = 'all',
+  }) async {
     Query query = _firestore
         .collection('scoreboard')
         .orderBy('correctCount', descending: true)
         .orderBy('timestamp', descending: true)
         .limit(limit);
+
+    final now = DateTime.now();
+    DateTime? start;
+    if (filter == 'week') {
+      start = DateTime(now.year, now.month, now.day - now.weekday + 1);
+    } else if (filter == 'month') {
+      start = DateTime(now.year, now.month, 1);
+    }
+
+    if (start != null) {
+      query = query.where(
+        'timestamp',
+        isGreaterThanOrEqualTo: Timestamp.fromDate(start),
+      );
+    }
 
     if (startAfter != null) {
       query = query.startAfterDocument(startAfter);
@@ -33,7 +49,10 @@ class FirestoreService {
     return await query.get();
   }
 
-  Future<List<ScoreboardEntry>> getUserScoreboard(String userId, {String filter = 'Monthly'}) async {
+  Future<List<ScoreboardEntry>> getUserScoreboard(
+    String userId, {
+    String filter = 'Monthly',
+  }) async {
     Query query = _firestore
         .collection('scoreboard')
         .where('userId', isEqualTo: userId);

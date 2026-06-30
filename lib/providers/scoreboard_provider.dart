@@ -10,30 +10,35 @@ class ScoreboardProvider extends ChangeNotifier {
   bool _isLoadingHistory = false;
   bool _hasMoreGlobalScores = true;
   DocumentSnapshot? _lastDoc;
-
-  String _selectedFilter = 'Monthly';
+  String _selectedScoreboardFilter = 'all';
+  String _selectedProfileFilter = 'Monthly';
   final List<ScoreboardEntry> _personalHistory = [];
   bool _isLoadingPersonalHistory = false;
 
   List<ScoreboardEntry> get history => _history;
   bool get isLoading => _isLoadingHistory;
   bool get hasMoreGlobalScores => _hasMoreGlobalScores;
-
-  String get selectedFilter => _selectedFilter;
-  set selectedFilter(String filter) {
-    _selectedFilter = filter;
+  String get selectedScoreboardFilter => _selectedScoreboardFilter;
+  String get selectedProfileFilter => _selectedProfileFilter;
+  set selectedProfileFilter(String filter) {
+    _selectedProfileFilter = filter;
     notifyListeners();
     loadPersonalResults();
+  }
+  set selectedScoreboardFilter(String filter) {
+    _selectedScoreboardFilter = filter;
+    notifyListeners();
+    loadHistory(refresh: true);
   }
 
   List<ScoreboardEntry> get personalHistory => _personalHistory;
   bool get isLoadingPersonalHistory => _isLoadingPersonalHistory;
 
-  Future<void> loadHistory() async {
+  Future<void> loadHistory({bool refresh = false}) async {
     _isLoadingHistory = true;
     notifyListeners();
     try {
-      fetchNextGlobalPage();
+      fetchNextGlobalPage(refresh: refresh);
     } catch (e) {
       debugPrint('Error loading scoreboard history: $e');
     } finally {
@@ -59,10 +64,10 @@ class ScoreboardProvider extends ChangeNotifier {
       final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
       final results = await FirestoreService().getUserScoreboard(
         userId,
-        filter: _selectedFilter,
+        filter: _selectedProfileFilter,
       );
       debugPrint(
-        'Loaded ${results.length} scoreboard entries for user $userId with filter $selectedFilter',
+        'Loaded ${results.length} scoreboard entries for user $userId with filter $selectedProfileFilter',
       );
       _personalHistory.clear();
       _personalHistory.addAll(results);
@@ -92,6 +97,7 @@ class ScoreboardProvider extends ChangeNotifier {
       final snapshot = await FirestoreService().getGlobalScoreboard(
         _lastDoc,
         10,
+        filter: _selectedScoreboardFilter,
       );
 
       if (snapshot.docs.isNotEmpty) {

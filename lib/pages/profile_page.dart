@@ -202,7 +202,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                                 child: Selector<ScoreboardProvider, String>(
                                   selector: (_, provider) =>
-                                      provider.selectedFilter,
+                                      provider.selectedProfileFilter,
                                   builder:
                                       (
                                         BuildContext context,
@@ -229,7 +229,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                           onSelected: (value) {
                                             context
                                                     .read<ScoreboardProvider>()
-                                                    .selectedFilter =
+                                                    .selectedProfileFilter =
                                                 value;
 
                                             /* setState(() {
