@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/providers/auth_provider.dart';
+import 'package:quiz_app/providers/profile_provider.dart';
+import 'package:quiz_app/providers/scoreboard_provider.dart';
+import 'package:quiz_app/widgets/edit_profile_dialogue.dart';
+import 'package:quiz_app/widgets/profile_image_widget.dart';
 import 'package:quiz_app/widgets/score_card_widget.dart';
-
-import '../providers/auth_provider.dart';
-import '../providers/scoreboard_provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -19,14 +21,17 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final uid = FirebaseAuth.instance.currentUser?.uid;
-      context.read<AuthProvider>().loadUserProfile(uid ?? '');
+      if (uid != null) {
+        context.read<ProfileProvider>().loadUserProfile(uid);
+      }
       context.read<ScoreboardProvider>().loadPersonalResults();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
+    final profileProvider = context.watch<ProfileProvider>();
+    final profile = profileProvider.userProfile;
 
     return Scaffold(
       backgroundColor: const Color(0xFF6B58E9),
@@ -42,14 +47,6 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () {
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    },
-                  ),
                   const Text(
                     'Profile',
                     style: TextStyle(
@@ -58,11 +55,26 @@ class _ProfilePageState extends State<ProfilePage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.settings, color: Colors.white),
-                    onPressed: () {
-                      context.read<AuthProvider>().logout();
-                    },
+                  Row(
+                    children: [
+                      if (profile != null)
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  EditProfileDialog(currentProfile: profile),
+                            );
+                          },
+                        ),
+                      IconButton(
+                        icon: const Icon(Icons.logout, color: Colors.white),
+                        onPressed: () {
+                          context.read<AuthProvider>().logout();
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -92,13 +104,25 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           // User Name
                           Text(
-                            authProvider.user?.displayName ?? 'Madelyn Dias',
+                            profile?.displayName ??
+                                'Unknown User', // Fallback if displayName is null
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF2C2C2C),
                             ),
                           ),
+                          if (profile?.bio != null) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              profile!.bio!,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                           const SizedBox(height: 24),
                           // Stats Card
                           Container(
@@ -113,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 _buildStatItem(
                                   Icons.star_border,
                                   'POINTS',
-                                  '590',
+                                  profile?.score.toString() ?? '0',
                                 ),
                                 Container(
                                   width: 1,
@@ -123,7 +147,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 _buildStatItem(
                                   Icons.public,
                                   'WORLD RANK',
-                                  '#1,438',
+                                  profile?.rank ?? '-',
                                 ),
                                 Container(
                                   width: 1,
@@ -231,15 +255,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                                     .read<ScoreboardProvider>()
                                                     .selectedProfileFilter =
                                                 value;
-
-                                            /* setState(() {
-                                              _selectedFilter = value;
-                                              _personalResultsFuture = context
-                                                  .read<ScoreboardProvider>()
-                                                  .loadPersonalResults(
-                                                    filter: _selectedFilter,
-                                                  );
-                                            }); */
                                           },
                                           itemBuilder: (context) => const [
                                             PopupMenuItem(
@@ -347,17 +362,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     left: 0,
                     right: 0,
                     child: Center(
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const CircleAvatar(
-                              radius: 46,
+                      child: profile != null
+                          ? ProfileImageWidget(
+                              userId: profile.uid,
+                              currentImageUrl: profile.avatarUrl,
+                            )
+                          : const CircleAvatar(
+                              radius: 50,
                               backgroundColor: Color(0xFFF0EFFF),
                               child: Icon(
                                 Icons.person,
@@ -365,32 +376,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                 color: Color(0xFF6B58E9),
                               ),
                             ),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              width: 28,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
-                                ),
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.flag,
-                                  size: 12,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ],

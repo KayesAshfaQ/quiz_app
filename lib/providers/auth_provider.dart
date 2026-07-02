@@ -101,7 +101,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadUserProfile(String uid) async {
+  /* Future<void> loadUserProfile(String uid) async {
     _setLoading(true);
     try {
       final userProfile = await FirestoreService().getUserProfile(uid);
@@ -118,7 +118,7 @@ class AuthProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
-  }
+  } */
 
   void _setLoading(bool value) {
     _isLoading = value;

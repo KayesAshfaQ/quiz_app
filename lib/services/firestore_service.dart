@@ -120,9 +120,14 @@ class FirestoreService {
 
   Future<User?> getUserProfile(String userId) async {
     final doc = await _firestore.collection('users').doc(userId).get();
-    if (doc.exists) {
+    if (doc.exists && doc.data() != null) {
       return User.fromMap(doc.data()!);
     }
     return null;
+  }
+
+  Future<void> updateUserProfile(User profile) async {
+    final userRef = _firestore.collection('users').doc(profile.uid);
+    await userRef.set(profile.toMap(), SetOptions(merge: true));
   }
 }
