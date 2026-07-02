@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/models/quiz_result.dart';
+import 'package:quiz_app/pages/ai_page.dart';
 import 'package:quiz_app/pages/login_page.dart';
 import 'package:quiz_app/pages/result_page.dart';
 import 'package:quiz_app/pages/scoreboard_page.dart';
@@ -24,6 +25,7 @@ class AppRoute {
   static const String quizResult = '/quiz-result';
   static const String scoreboard = '/scoreboard';
   static const String profile = '/profile';
+  static const String ai = '/ai-interaction';
 
   static final routes = GoRouter(
     initialLocation: login,
@@ -74,6 +76,7 @@ class AppRoute {
         path: AppRoute.profile,
         builder: (context, state) => ProfilePage(),
       ),
+      GoRoute(path: AppRoute.ai, builder: (context, state) => AiPage()),
     ],
   );
 }

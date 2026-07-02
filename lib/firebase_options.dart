@@ -68,7 +68,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '388385014884',
     projectId: 'quiz-app-bdapps',
     storageBucket: 'quiz-app-bdapps.firebasestorage.app',
-    androidClientId: '388385014884-gbg532f5p6ggt7d32t9pc6cggpqqsims.apps.googleusercontent.com',
+    androidClientId: '388385014884-dokv84hgd06mjbvkcrl4pigjnub8maaj.apps.googleusercontent.com',
     iosClientId: '388385014884-omls3g3c2pqmsuvseue45j1fhsjf4knq.apps.googleusercontent.com',
     iosBundleId: 'com.example.quizApp',
   );

@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/app_route.dart';
 import 'package:quiz_app/providers/auth_provider.dart';
 import 'package:quiz_app/providers/profile_provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
@@ -383,6 +385,13 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Navigate to the Ai interaction page
+          context.push(AppRoute.ai);
+        },
+        child: const Icon(Icons.bolt, color: Color(0xFF6B58E9)),
       ),
     );
   }
