@@ -1,119 +1,109 @@
 import 'package:flutter/material.dart';
 
 class PodiumPainter extends CustomPainter {
-  final Color firstPlaceColor;
-  final Color secondPlaceColor;
-  final Color thirdPlaceColor;
+  final Color color;
+  final int position;
+  final double depth;
+
+  final Color? topColorOverride;
+  final Color? sideColorOverride;
+
+  final bool useFrontGradient;
+  final double topCornerRadius;
+  final TextStyle? numberStyle;
 
   PodiumPainter({
-    required this.firstPlaceColor,
-    required this.secondPlaceColor,
-    required this.thirdPlaceColor,
+    required this.color,
+    required this.position,
+    this.depth = 22,
+    this.topColorOverride,
+    this.sideColorOverride,
+    this.useFrontGradient = true,
+    this.topCornerRadius = 10,
+    this.numberStyle,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // The width is divided into three equal columns.
-    final stepWidth = size.width / 3;
+    final w = size.width;
+    final h = size.height;
+    final d = depth.clamp(0, w * 0.4).toDouble();
 
-    // Heights for the steps
-    final firstHeight = size.height;
-    final secondHeight = size.height * 0.7;
-    final thirdHeight = size.height * 0.5;
+    final topColor = topColorOverride ?? _shift(color, 0.22);
+    final sideColor = sideColorOverride ?? _shift(color, -0.14);
 
-    // Top face depth for the 3D effect
-    final topDepth = size.height * 0.15;
-    
-    // Draw 2nd place (left)
-    _drawStep(
-      canvas,
-      xOffset: 0,
-      yOffset: size.height - secondHeight,
-      width: stepWidth,
-      height: secondHeight,
-      topDepth: topDepth,
-      baseColor: secondPlaceColor,
+    // Front face bounds
+    final frontRect = Rect.fromLTWH(0, d, w - d, h - d);
+    final frontRRect = RRect.fromRectAndCorners(
+      frontRect,
+      topLeft: Radius.circular(topCornerRadius),
     );
 
-    // Draw 3rd place (right)
-    _drawStep(
-      canvas,
-      xOffset: stepWidth * 2,
-      yOffset: size.height - thirdHeight,
-      width: stepWidth,
-      height: thirdHeight,
-      topDepth: topDepth,
-      baseColor: thirdPlaceColor,
-    );
+    // ---- FRONT FACE ----
+    final frontPaint = Paint();
+    if (useFrontGradient) {
+      frontPaint.shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [color, _shift(color, 0.28)],
+      ).createShader(frontRect);
+    } else {
+      frontPaint.color = color;
+    }
+    canvas.drawRRect(frontRRect, frontPaint);
 
-    // Draw 1st place (center) - drawn last so it overlaps the others slightly if needed
-    _drawStep(
-      canvas,
-      xOffset: stepWidth,
-      yOffset: size.height - firstHeight,
-      width: stepWidth,
-      height: firstHeight,
-      topDepth: topDepth,
-      baseColor: firstPlaceColor,
-    );
-  }
-
-  void _drawStep(
-    Canvas canvas, {
-    required double xOffset,
-    required double yOffset,
-    required double width,
-    required double height,
-    required double topDepth,
-    required Color baseColor,
-  }) {
-    // Colors for shading
-    final frontColor = baseColor;
-    final topColor = _lighten(baseColor, 0.15);
-    final sideColor = _darken(baseColor, 0.15);
-
-    // Front face
-    final frontPaint = Paint()..color = frontColor;
-    canvas.drawRect(
-      Rect.fromLTWH(xOffset, yOffset + topDepth, width, height - topDepth),
-      frontPaint,
-    );
-
-    // Top face (parallelogram)
-    final topPaint = Paint()..color = topColor;
+    // ---- TOP FACE
     final topPath = Path()
-      ..moveTo(xOffset, yOffset + topDepth)
-      ..lineTo(xOffset + topDepth, yOffset)
-      ..lineTo(xOffset + width + topDepth, yOffset)
-      ..lineTo(xOffset + width, yOffset + topDepth)
+      ..moveTo(topCornerRadius * 0.4, d)
+      ..lineTo(d + topCornerRadius * 0.4, 0)
+      ..lineTo(w, 0)
+      ..lineTo(w - d, d)
       ..close();
-    canvas.drawPath(topPath, topPaint);
+    canvas.drawPath(topPath, Paint()..color = topColor);
 
-    // Right side face
-    final sidePaint = Paint()..color = sideColor;
+    // ---- RIGHT SIDE FACE
     final sidePath = Path()
-      ..moveTo(xOffset + width, yOffset + topDepth)
-      ..lineTo(xOffset + width + topDepth, yOffset)
-      ..lineTo(xOffset + width + topDepth, yOffset + height - topDepth)
-      ..lineTo(xOffset + width, yOffset + height)
+      ..moveTo(w - d, d)
+      ..lineTo(w, 0)
+      ..lineTo(w, h - d)
+      ..lineTo(w - d, h)
       ..close();
-    canvas.drawPath(sidePath, sidePaint);
+    canvas.drawPath(sidePath, Paint()..color = sideColor);
+
+    // ---- RANK NUMBER on the front face ----
+    final style =
+        numberStyle ??
+        TextStyle(
+          color: Colors.white,
+          fontSize: (w - d) * 0.55,
+          fontWeight: FontWeight.w900,
+          height: 1.0,
+        );
+    final tp = TextPainter(
+      text: TextSpan(text: '$position', style: style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final textOffset = Offset(
+      (w - d - tp.width) / 2,
+      d + (h - d - tp.height) / 2,
+    );
+    tp.paint(canvas, textOffset);
   }
 
-  Color _lighten(Color color, [double amount = .1]) {
-    assert(amount >= 0 && amount <= 1);
-    final hsl = HSLColor.fromColor(color);
-    final hslLight = hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
-    return hslLight.toColor();
-  }
-
-  Color _darken(Color color, [double amount = .1]) {
-    assert(amount >= 0 && amount <= 1);
-    final hsl = HSLColor.fromColor(color);
-    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
-    return hslDark.toColor();
+  /// Lightens (positive [amount]) or darkens (negative [amount]) [c] by
+  /// adjusting HSL lightness.
+  Color _shift(Color c, double amount) {
+    final hsl = HSLColor.fromColor(c);
+    return hsl
+        .withLightness((hsl.lightness + amount).clamp(0.0, 1.0))
+        .toColor();
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant PodiumPainter oldDelegate) {
+    return oldDelegate.color != color ||
+        oldDelegate.position != position ||
+        oldDelegate.depth != depth ||
+        oldDelegate.useFrontGradient != useFrontGradient;
+  }
 }

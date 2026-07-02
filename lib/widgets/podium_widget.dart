@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/models/scoreboard_entry.dart';
-import 'package:quiz_app/widgets/podium_avatar.dart';
 
-import 'podium_painter.dart';
+import 'leader_avatar.dart';
+import 'podium_block.dart';
 
 class PodiumWidget extends StatelessWidget {
   final List<ScoreboardEntry> topUsers;
@@ -15,7 +15,7 @@ class PodiumWidget extends StatelessWidget {
     final secondPlace = topUsers.length > 1 ? topUsers[1] : null;
     final thirdPlace = topUsers.length > 2 ? topUsers[2] : null;
 
-    final baseColor = Theme.of(context).colorScheme.primary;
+    final podiumColor = Theme.of(context).colorScheme.primary;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -23,67 +23,62 @@ class PodiumWidget extends StatelessWidget {
             ? constraints.maxWidth * 0.5
             : constraints.maxHeight * 0.5;
 
-        return Stack(
-          children: [
-            SizedBox(height: podiumHeight + 120, width: constraints.maxWidth),
-
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: CustomPaint(
-                size: Size(constraints.maxWidth, podiumHeight),
-                painter: PodiumPainter(
-                  firstPlaceColor: baseColor,
-                  secondPlaceColor: baseColor,
-                  thirdPlaceColor: baseColor,
-                ),
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // 2nd place
+                  PodiumBlock(
+                    color: podiumColor,
+                    height: podiumHeight * 0.7,
+                    width: constraints.maxWidth / 3,
+                    position: 2,
+                    qp: secondPlace?.correctCount ?? 0,
+                    avatar: const LeaderAvatar(
+                      backgroundColor: Color(0xFFFBD9E6),
+                      icon: Icons.face_3,
+                      flagEmoji: '🇫🇷',
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  // 1st place (the one the painter is dynamic enough to make
+                  // taller + wider + with a crown, just by changing inputs)
+                  PodiumBlock(
+                    color: podiumColor,
+                    height: podiumHeight,
+                    width: constraints.maxWidth / 3,
+                    position: 1,
+                    qp: firstPlace?.correctCount ?? 0,
+                    avatar: const LeaderAvatar(
+                      backgroundColor: Color(0xFFCFF3E8),
+                      icon: Icons.face,
+                      flagEmoji: '🇵🇹',
+                      showCrown: true,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  // 3rd place
+                  PodiumBlock(
+                    color: podiumColor,
+                    height: podiumHeight * 0.5,
+                    width: constraints.maxWidth / 3,
+                    position: 3,
+                    qp: thirdPlace?.correctCount ?? 0,
+                    avatar: const LeaderAvatar(
+                      backgroundColor: Color(0xFFD6E4FB),
+                      icon: Icons.face_4,
+                      flagEmoji: '🇨🇦',
+                    ),
+                  ),
+                ],
               ),
             ),
-
-            // 2nd Place
-            if (secondPlace != null)
-              Positioned(
-                left: 0,
-                bottom: podiumHeight * 0.7,
-                width: constraints.maxWidth / 3,
-                child: Center(
-                  child: PodiumAvatar(
-                    displayName: secondPlace.displayName ?? 'Unknown',
-                    score: secondPlace.correctCount,
-                    rank: 2,
-                  ),
-                ),
-              ),
-            // 1st Place
-            if (firstPlace != null)
-              Positioned(
-                left: constraints.maxWidth / 3,
-                bottom: podiumHeight + 20,
-                width: constraints.maxWidth / 3,
-                child: Center(
-                  child: PodiumAvatar(
-                    displayName: firstPlace.displayName ?? 'Unknown',
-                    score: firstPlace.correctCount,
-                    rank: 1,
-                  ),
-                ),
-              ),
-            // 3rd Place
-            if (thirdPlace != null)
-              Positioned(
-                right: 0,
-                bottom: podiumHeight * 0.5,
-                width: constraints.maxWidth / 3 - 28,
-                child: Center(
-                  child: PodiumAvatar(
-                    displayName: thirdPlace.displayName ?? 'Unknown',
-                    score: thirdPlace.correctCount,
-                    rank: 3,
-                  ),
-                ),
-              ),
-          ],
+          ),
         );
       },
     );
