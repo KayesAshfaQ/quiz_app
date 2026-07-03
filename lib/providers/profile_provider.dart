@@ -39,31 +39,43 @@ class ProfileProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _userProfile = await _profileRepository.getUserProfile(userId);
-
-    _isLoading = false;
-    notifyListeners();
+    try {
+      _userProfile = await _profileRepository.getUserProfile(userId);
+    } catch (e) {
+      debugPrint('Error loading current user profile: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> loadUserProfile(String userId) async {
     _isLoading = true;
     notifyListeners();
 
-    _userProfile = await _profileRepository.getUserProfile(userId);
-
-    _isLoading = false;
-    notifyListeners();
+    try {
+      _userProfile = await _profileRepository.getUserProfile(userId);
+    } catch (e) {
+      debugPrint('Error loading user profile: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> updateUserProfile(User updatedProfile) async {
     _isLoading = true;
     notifyListeners();
 
-    await _profileRepository.updateUserProfile(updatedProfile);
-    _userProfile = updatedProfile;
-
-    _isLoading = false;
-    notifyListeners();
+    try {
+      await _profileRepository.updateUserProfile(updatedProfile);
+      _userProfile = updatedProfile;
+    } catch (e) {
+      debugPrint('Error updating user profile: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> updateProfileImage(ImageSource source) async {
@@ -83,6 +95,8 @@ class ProfileProvider extends ChangeNotifier {
       );
 
       await loadUserProfile(userId);
+    } catch (e) {
+      debugPrint('Error updating profile image: $e');
     } finally {
       _isUploadingImage = false;
       notifyListeners();
