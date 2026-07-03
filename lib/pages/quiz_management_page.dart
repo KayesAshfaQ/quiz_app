@@ -25,7 +25,7 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
 
   @override
   Widget build(BuildContext context) {
-    print('Building QuizManagementPage with ${questions.length} questions');
+    debugPrint('Building QuizManagementPage with ${questions.length} questions');
 
     return Scaffold(
       appBar: AppBar(title: Text('Quiz Management'), actions: [
@@ -97,7 +97,9 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
                           children: [
                             Radio<int>(
                               value: index,
+                              // ignore: deprecated_member_use
                               groupValue: _correctOptionIndex,
+                              // ignore: deprecated_member_use
                               onChanged: (value) {
                                 setState(() {
                                   _correctOptionIndex = value!;

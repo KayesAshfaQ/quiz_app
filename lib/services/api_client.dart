@@ -1,7 +1,5 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
 import '../models/question.dart';
 
@@ -21,15 +19,15 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          print('Requesting: ${options.method} ${options.uri}');
+          debugPrint('Requesting: ${options.method} ${options.uri}');
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          print('Response: ${response.statusCode} ${response.data}');
+          debugPrint('Response: ${response.statusCode} ${response.data}');
           return handler.next(response);
         },
-        onError: (DioError e, handler) {
-          print('Error: ${e.message}');
+        onError: (DioException e, handler) {
+          debugPrint('Error: ${e.message}');
           return handler.next(e);
         },
       ),
@@ -50,7 +48,7 @@ class ApiClient {
       final List<Question> questions = (data['results'] as List)
           .map((json) => Question.fromJson(json))
           .toList();
-      print('Fetched ${questions.length} questions from API');
+      debugPrint('Fetched ${questions.length} questions from API');
       return questions;
     } else {
       throw Exception('Failed to fetch questions');
@@ -59,18 +57,21 @@ class ApiClient {
 
 
   Future<List<Question>> fetchTdb() async {
-    final response = await http.get(
-      Uri.parse(
-        'https://opentdb.com/api.php?amount=10&category=18&difficulty=medium&type=multiple',
-      ),
+    final response = await _dio.get(
+      '',
+      queryParameters: {
+        'amount': 10,
+        'category': 18,
+        'difficulty': 'medium',
+        'type': 'multiple',
+      },
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final List<Question> questions = (data['results'] as List)
+      final List<Question> questions = (response.data['results'] as List)
           .map((json) => Question.fromJson(json))
           .toList();
-      print('Fetched ${questions.length} questions from API');
+      debugPrint('Fetched ${questions.length} questions from API');
       return questions;
     } else {
       throw Exception('Failed to fetch Tdb data');
