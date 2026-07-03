@@ -1,5 +1,4 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
@@ -7,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:quiz_app/app_route.dart';
 
 import 'package:quiz_app/models/quiz_result.dart';
-import 'package:quiz_app/models/scoreboard_entry.dart';
 import 'package:quiz_app/providers/quiz_provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
 import 'package:quiz_app/widgets/score_circle.dart';
@@ -28,20 +26,7 @@ class _ResultPageState extends State<ResultPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // final quiz = context.read<QuizProvider>();
-      final scoreboard = context.read<ScoreboardProvider>();
-      final currentUser = FirebaseAuth.instance.currentUser;
-
-      final entry = ScoreboardEntry(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        categoryName: widget.result.categoryName,
-        correctCount: widget.result.correctCount,
-        totalQuestions: widget.result.totalQuestions,
-        timestamp: widget.result.timestamp,
-        userId: currentUser?.uid ?? 'anonymous',
-        displayName: currentUser?.displayName ?? 'Anonymous',
-      );
-      scoreboard.addEntry(entry);
+      context.read<ScoreboardProvider>().saveQuizResult(widget.result);
     });
   }
 

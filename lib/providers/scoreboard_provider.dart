@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:quiz_app/models/quiz_result.dart';
 import 'package:quiz_app/models/scoreboard_entry.dart';
 import 'package:quiz_app/repository/scoreboard_repository.dart';
 
@@ -43,6 +45,24 @@ class ScoreboardProvider extends ChangeNotifier {
       await loadHistory();
     } catch (e) {
       debugPrint('Error saving scoreboard entry: $e');
+    }
+  }
+
+  Future<void> saveQuizResult(QuizResult result) async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      final entry = ScoreboardEntry(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        categoryName: result.categoryName,
+        correctCount: result.correctCount,
+        totalQuestions: result.totalQuestions,
+        timestamp: result.timestamp,
+        userId: currentUser?.uid ?? 'anonymous',
+        displayName: currentUser?.displayName ?? 'Anonymous',
+      );
+      await addEntry(entry);
+    } catch (e) {
+      debugPrint('Error saving quiz result: $e');
     }
   }
 
