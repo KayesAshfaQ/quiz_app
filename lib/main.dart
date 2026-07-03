@@ -8,6 +8,16 @@ import 'package:quiz_app/providers/auth_provider.dart';
 import 'package:quiz_app/providers/profile_provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
 
+import 'package:quiz_app/repository/auth_repository.dart';
+import 'package:quiz_app/repository/profile_repository.dart';
+import 'package:quiz_app/repository/scoreboard_repository.dart';
+import 'package:quiz_app/repository/quiz_repository.dart';
+import 'package:quiz_app/services/firestore_service.dart';
+import 'package:quiz_app/services/storage_service.dart';
+import 'package:quiz_app/services/auth_service.dart';
+import 'package:quiz_app/services/hive_storage_service.dart';
+import 'package:quiz_app/services/api_client.dart';
+
 import 'app_route.dart';
 import 'providers/quiz_provider.dart';
 
@@ -19,23 +29,63 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(ScoreboardEntryAdapter());
 
-  runApp(const QuizApp());
+  // Initialize Services
+  final firestoreService = FirestoreService();
+  final storageService = StorageService();
+  final authService = AuthService();
+  final hiveStorageService = HiveStorageService();
+  final apiClient = ApiClient();
+
+  // Initialize Repositories
+  final authRepository = AuthRepository(
+    authService: authService,
+    firestoreService: firestoreService,
+  );
+  final profileRepository = ProfileRepository(
+    firestoreService: firestoreService,
+    storageService: storageService,
+  );
+  final scoreboardRepository = ScoreboardRepository(
+    firestoreService: firestoreService,
+    hiveStorageService: hiveStorageService,
+  );
+  final quizRepository = QuizRepository(
+    apiClient: apiClient,
+  );
+
+  runApp(QuizApp(
+    authRepository: authRepository,
+    profileRepository: profileRepository,
+    scoreboardRepository: scoreboardRepository,
+    quizRepository: quizRepository,
+  ));
 }
 
 class QuizApp extends StatelessWidget {
-  const QuizApp({super.key});
+  final AuthRepository authRepository;
+  final ProfileRepository profileRepository;
+  final ScoreboardRepository scoreboardRepository;
+  final QuizRepository quizRepository;
+
+  const QuizApp({
+    super.key,
+    required this.authRepository,
+    required this.profileRepository,
+    required this.scoreboardRepository,
+    required this.quizRepository,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => QuizProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider(authRepository: authRepository)),
+        ChangeNotifierProvider(create: (_) => QuizProvider(repository: quizRepository)),
         ChangeNotifierProvider(
-          create: (_) => ScoreboardProvider()..loadHistory(),
+          create: (_) => ScoreboardProvider(repository: scoreboardRepository)..loadHistory(),
         ),
         ChangeNotifierProvider(
-          create: (_) => ProfileProvider(),
+          create: (_) => ProfileProvider(profileRepository: profileRepository),
         ),
       ],
       child: MaterialApp.router(
