@@ -32,6 +32,19 @@ class ProfileProvider extends ChangeNotifier {
     loadPersonalResults();
   }
 
+  Future<void> loadCurrentUserProfile() async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+    
+    _isLoading = true;
+    notifyListeners();
+
+    _userProfile = await _profileRepository.getUserProfile(userId);
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> loadUserProfile(String userId) async {
     _isLoading = true;
     notifyListeners();

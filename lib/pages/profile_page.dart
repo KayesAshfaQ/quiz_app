@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -22,10 +21,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid != null) {
-        context.read<ProfileProvider>().loadUserProfile(uid);
-      }
+      context.read<ProfileProvider>().loadCurrentUserProfile();
       context.read<ProfileProvider>().loadPersonalResults();
     });
   }
