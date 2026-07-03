@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:quiz_app/app_route.dart';
 import 'package:quiz_app/providers/auth_provider.dart';
 import 'package:quiz_app/providers/profile_provider.dart';
-import 'package:quiz_app/providers/scoreboard_provider.dart';
 import 'package:quiz_app/widgets/edit_profile_dialogue.dart';
 import 'package:quiz_app/widgets/profile_image_widget.dart';
 import 'package:quiz_app/widgets/score_card_widget.dart';
@@ -26,7 +25,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (uid != null) {
         context.read<ProfileProvider>().loadUserProfile(uid);
       }
-      context.read<ScoreboardProvider>().loadPersonalResults();
+      context.read<ProfileProvider>().loadPersonalResults();
     });
   }
 
@@ -226,7 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     color: Colors.grey.shade300,
                                   ),
                                 ),
-                                child: Selector<ScoreboardProvider, String>(
+                                child: Selector<ProfileProvider, String>(
                                   selector: (_, provider) =>
                                       provider.selectedProfileFilter,
                                   builder:
@@ -254,7 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                           ),
                                           onSelected: (value) {
                                             context
-                                                    .read<ScoreboardProvider>()
+                                                    .read<ProfileProvider>()
                                                     .selectedProfileFilter =
                                                 value;
                                           },
@@ -285,7 +284,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           const SizedBox(height: 16),
                           // Matches List
                           Expanded(
-                            child: Consumer<ScoreboardProvider>(
+                            child: Consumer<ProfileProvider>(
                               builder: (context, provider, child) {
                                 if (provider.isLoadingPersonalHistory) {
                                   return const Center(
@@ -310,31 +309,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ElevatedButton(
                                         onPressed: () {
                                           context
-                                              .read<ScoreboardProvider>()
-                                              .loadPersonalResults();
-                                        },
-                                        child: const Text('refresh'),
-                                      ),
-                                    ],
-                                  );
-                                }
-
-                                if (history.isEmpty) {
-                                  return Column(
-                                    children: [
-                                      const SizedBox(height: 50),
-                                      const Text(
-                                        'No recent matches found.',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 20),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          context
-                                              .read<ScoreboardProvider>()
+                                              .read<ProfileProvider>()
                                               .loadPersonalResults();
                                         },
                                         child: const Text('refresh'),

@@ -25,9 +25,7 @@ class ScoreboardRepository {
     await _hiveStorageService.saveScoreEntry(entry);
   }
 
-  Future<List<ScoreboardEntry>> getPersonalResults(String userId, String filter) async {
-    return await _firestoreService.getUserScoreboard(userId, filter: filter);
-  }
+
 
   Future<PaginatedScoreboardResult> getGlobalScoreboard(
       DocumentSnapshot? startAfter, int limit, String filter) async {

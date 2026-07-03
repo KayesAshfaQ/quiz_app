@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:quiz_app/models/user.dart';
+import 'package:quiz_app/models/scoreboard_entry.dart';
 import 'package:quiz_app/services/firestore_service.dart';
 import 'package:quiz_app/services/storage_service.dart';
 
@@ -40,5 +41,9 @@ class ProfileRepository {
 
   Future<void> updateUserProfile(User profile) async {
     return await _firestoreService.updateUserProfile(profile);
+  }
+
+  Future<List<ScoreboardEntry>> getPersonalResults(String userId, String filter) async {
+    return await _firestoreService.getUserScoreboard(userId, filter: filter);
   }
 }
