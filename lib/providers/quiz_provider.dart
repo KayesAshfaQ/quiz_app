@@ -3,11 +3,17 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/models/quiz_result.dart';
+import 'package:quiz_app/repository/quiz_repository.dart';
 
 enum QuizStatus { idle, active, finished }
 
 class QuizProvider extends ChangeNotifier {
   static const int totalSeconds = 15;
+
+  final QuizRepository _repository;
+
+  QuizProvider({QuizRepository? repository})
+      : _repository = repository ?? QuizRepository();
 
   List<Question> _questions = [];
   int _currentIndex = 0;
@@ -50,6 +56,13 @@ class QuizProvider extends ChangeNotifier {
     categoryName: _categoryName,
     timestamp: _startTime,
   );
+
+  Future<List<Question>> fetchQuestions({
+    int amount = 10,
+    String difficulty = 'medium',
+  }) async {
+    return await _repository.fetchQuestions(amount: amount, difficulty: difficulty);
+  }
 
   // sample questions (hardcoded for now)
   static final List<Question> sampleQuestions = [

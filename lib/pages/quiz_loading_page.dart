@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:quiz_app/app_route.dart';
 import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/providers/quiz_provider.dart';
-import 'package:quiz_app/services/api_client.dart';
 
 class QuizLoadingPage extends StatefulWidget {
   const QuizLoadingPage({super.key});
@@ -15,7 +14,6 @@ class QuizLoadingPage extends StatefulWidget {
 
 class _QuizLoadingPageState extends State<QuizLoadingPage> {
   late Future<List<Question>> _questionsFuture;
-  final ApiClient _apiClient = ApiClient();
 
   @override
   void initState() {
@@ -25,7 +23,7 @@ class _QuizLoadingPageState extends State<QuizLoadingPage> {
 
   void fetchQuestions() {
     setState(() {
-      _questionsFuture = _apiClient.fetchQuestions();
+      _questionsFuture = context.read<QuizProvider>().fetchQuestions();
     });
   }
 

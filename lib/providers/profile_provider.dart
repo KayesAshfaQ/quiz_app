@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/models/user.dart';
-import 'package:quiz_app/services/firestore_service.dart';
+import 'package:quiz_app/repository/profile_repository.dart';
 
 class ProfileProvider extends ChangeNotifier {
-  final FirestoreService _firestoreService;
+  final ProfileRepository _profileRepository;
   User? _userProfile;
   bool _isLoading = false;
 
-  ProfileProvider(this._firestoreService);
+  ProfileProvider({ProfileRepository? profileRepository})
+      : _profileRepository = profileRepository ?? ProfileRepository();
 
   User? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
@@ -16,7 +17,7 @@ class ProfileProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _userProfile = await _firestoreService.getUserProfile(userId);
+    _userProfile = await _profileRepository.getUserProfile(userId);
 
     _isLoading = false;
     notifyListeners();
@@ -26,7 +27,7 @@ class ProfileProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await _firestoreService.updateUserProfile(updatedProfile);
+    await _profileRepository.updateUserProfile(updatedProfile);
     _userProfile = updatedProfile;
 
     _isLoading = false;

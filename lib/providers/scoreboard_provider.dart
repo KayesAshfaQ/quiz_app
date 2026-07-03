@@ -2,10 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/models/scoreboard_entry.dart';
-
-import '../services/firestore_service.dart';
+import 'package:quiz_app/repository/scoreboard_repository.dart';
 
 class ScoreboardProvider extends ChangeNotifier {
+  final ScoreboardRepository _repository;
+
   final List<ScoreboardEntry> _history = [];
   bool _isLoadingHistory = false;
   bool _hasMoreGlobalScores = true;
@@ -15,16 +16,21 @@ class ScoreboardProvider extends ChangeNotifier {
   final List<ScoreboardEntry> _personalHistory = [];
   bool _isLoadingPersonalHistory = false;
 
+  ScoreboardProvider({ScoreboardRepository? repository})
+      : _repository = repository ?? ScoreboardRepository();
+
   List<ScoreboardEntry> get history => _history;
   bool get isLoading => _isLoadingHistory;
   bool get hasMoreGlobalScores => _hasMoreGlobalScores;
   String get selectedScoreboardFilter => _selectedScoreboardFilter;
   String get selectedProfileFilter => _selectedProfileFilter;
+  
   set selectedProfileFilter(String filter) {
     _selectedProfileFilter = filter;
     notifyListeners();
     loadPersonalResults();
   }
+  
   set selectedScoreboardFilter(String filter) {
     _selectedScoreboardFilter = filter;
     notifyListeners();
@@ -35,8 +41,6 @@ class ScoreboardProvider extends ChangeNotifier {
   bool get isLoadingPersonalHistory => _isLoadingPersonalHistory;
 
   Future<void> loadHistory({bool refresh = false}) async {
-    /* _isLoadingHistory = true;
-    notifyListeners(); */
     try {
       fetchNextGlobalPage(refresh: refresh);
     } catch (e) {
@@ -49,8 +53,7 @@ class ScoreboardProvider extends ChangeNotifier {
 
   Future<void> addEntry(ScoreboardEntry entry) async {
     try {
-      await FirestoreService().saveScoreboardEntry(entry);
-
+      await _repository.addEntry(entry);
       await loadHistory();
     } catch (e) {
       debugPrint('Error saving scoreboard entry: $e');
@@ -62,9 +65,9 @@ class ScoreboardProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
-      final results = await FirestoreService().getUserScoreboard(
+      final results = await _repository.getPersonalResults(
         userId,
-        filter: _selectedProfileFilter,
+        _selectedProfileFilter,
       );
       debugPrint(
         'Loaded ${results.length} scoreboard entries for user $userId with filter $selectedProfileFilter',
@@ -94,24 +97,18 @@ class ScoreboardProvider extends ChangeNotifier {
     Future.microtask(() => notifyListeners());
 
     try {
-      final snapshot = await FirestoreService().getGlobalScoreboard(
+      final result = await _repository.getGlobalScoreboard(
         _lastDoc,
         10,
-        filter: _selectedScoreboardFilter,
+        _selectedScoreboardFilter,
       );
 
-      if (snapshot.docs.isNotEmpty) {
-        _lastDoc = snapshot.docs.last;
-        final newEntry = snapshot.docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          data['id'] = doc.id; // Include document ID in the data
-          return ScoreboardEntry.fromFirestore(data);
-        }).toList();
-
-        _history.addAll(newEntry);
+      if (result.entries.isNotEmpty) {
+        _lastDoc = result.lastDoc;
+        _history.addAll(result.entries);
       }
 
-      if (snapshot.docs.length < 10) {
+      if (result.entries.length < 10) {
         _hasMoreGlobalScores = false;
       }
     } catch (e) {
@@ -124,7 +121,7 @@ class ScoreboardProvider extends ChangeNotifier {
 
   Future<void> deleteResult(String resultId) async {
     try {
-      await FirestoreService().deleteScoreboardEntry(resultId);
+      await _repository.deleteResult(resultId);
       await loadHistory(); // Refresh local history after deletion
     } catch (e) {
       debugPrint('Error deleting scoreboard entry: $e');

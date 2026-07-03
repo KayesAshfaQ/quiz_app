@@ -7,7 +7,6 @@ import 'package:quiz_app/models/scoreboard_entry.dart';
 import 'package:quiz_app/providers/auth_provider.dart';
 import 'package:quiz_app/providers/profile_provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
-import 'package:quiz_app/services/firestore_service.dart';
 
 import 'app_route.dart';
 import 'providers/quiz_provider.dart';
@@ -36,7 +35,7 @@ class QuizApp extends StatelessWidget {
           create: (_) => ScoreboardProvider()..loadHistory(),
         ),
         ChangeNotifierProvider(
-          create: (_) => ProfileProvider(FirestoreService()),
+          create: (_) => ProfileProvider(),
         ),
       ],
       child: MaterialApp.router(

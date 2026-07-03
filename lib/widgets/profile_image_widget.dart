@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/providers/profile_provider.dart';
 import 'package:quiz_app/services/firestore_service.dart';
-import 'package:quiz_app/services/profile_repository.dart';
+import 'package:quiz_app/repository/profile_repository.dart';
 import 'package:quiz_app/utils/image_picker_util.dart';
 
 class ProfileImageWidget extends StatefulWidget {
