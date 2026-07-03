@@ -6,6 +6,7 @@ import 'package:quiz_app/app_route.dart';
 import 'package:quiz_app/providers/auth_provider.dart';
 import 'package:quiz_app/providers/profile_provider.dart';
 import 'package:quiz_app/widgets/edit_profile_dialogue.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:quiz_app/widgets/profile_image_widget.dart';
 import 'package:quiz_app/widgets/score_card_widget.dart';
 
@@ -27,6 +28,50 @@ class _ProfilePageState extends State<ProfilePage> {
       }
       context.read<ProfileProvider>().loadPersonalResults();
     });
+  }
+
+  Future<void> _updateProfileImage(ImageSource source) async {
+    try {
+      await context.read<ProfileProvider>().updateProfileImage(source);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile image updated successfully.')),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        );
+      }
+    }
+  }
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Photo Library'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _updateProfileImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _updateProfileImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -341,8 +386,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Center(
                       child: profile != null
                           ? ProfileImageWidget(
-                              userId: profile.uid,
                               currentImageUrl: profile.avatarUrl,
+                              isLoading: profileProvider.isUploadingImage,
+                              onEditTap: () => _showImageSourceDialog(),
                             )
                           : const CircleAvatar(
                               radius: 50,

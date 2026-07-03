@@ -1,23 +1,27 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:quiz_app/models/user.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:quiz_app/repository/profile_repository.dart';
 import 'package:quiz_app/models/scoreboard_entry.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:quiz_app/utils/image_picker_util.dart';
+
 class ProfileProvider extends ChangeNotifier {
   final ProfileRepository _profileRepository;
   User? _userProfile;
   bool _isLoading = false;
+  bool _isUploadingImage = false;
 
   String _selectedProfileFilter = 'Monthly';
   final List<ScoreboardEntry> _personalHistory = [];
   bool _isLoadingPersonalHistory = false;
 
-  ProfileProvider({
-    ProfileRepository? profileRepository,
-  })  : _profileRepository = profileRepository ?? ProfileRepository();
+  ProfileProvider({ProfileRepository? profileRepository})
+    : _profileRepository = profileRepository ?? ProfileRepository();
 
   User? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
+  bool get isUploadingImage => _isUploadingImage;
   String get selectedProfileFilter => _selectedProfileFilter;
   List<ScoreboardEntry> get personalHistory => _personalHistory;
   bool get isLoadingPersonalHistory => _isLoadingPersonalHistory;
@@ -47,6 +51,29 @@ class ProfileProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> updateProfileImage(ImageSource source) async {
+    try {
+      final file = await ImagePickerUtil().pickImage(source: source);
+      if (file == null) return;
+
+      _isUploadingImage = true;
+      notifyListeners();
+
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) throw Exception('User not authenticated');
+
+      await _profileRepository.uploadProfileImage(
+        userId: userId,
+        imageFile: file,
+      );
+
+      await loadUserProfile(userId);
+    } finally {
+      _isUploadingImage = false;
+      notifyListeners();
+    }
   }
 
   Future<void> loadPersonalResults() async {
