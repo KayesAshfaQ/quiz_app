@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:firebase_ai/firebase_ai.dart';
+import 'package:quiz_app/models/question.dart';
 
 class AiService {
   late final GenerativeModel _model;
@@ -42,6 +43,45 @@ ${wrongAnswers.map((w) => "questionIndex: ${w['index']}, Question: ${w['question
         return decoded.map(
           (key, value) => MapEntry(int.parse(key), value.toString()),
         );
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  Future<List<Question>?> generateQuiz(String prompt) async {
+    final instructions = '''
+You are a quiz generator. Generate a 10-question multiple-choice quiz about: $prompt.
+Return the result strictly as a JSON array of objects, where each object represents a question.
+Each object must have the following keys:
+- "question": The question text (string)
+- "correct_answer": The correct answer (string)
+- "incorrect_answers": An array of exactly 3 incorrect answers (array of strings)
+- "difficulty": "easy", "medium", or "hard" (string)
+
+Example format:
+[
+  {
+    "question": "What is 2 + 2?",
+    "correct_answer": "4",
+    "incorrect_answers": ["3", "5", "6"],
+    "difficulty": "easy"
+  }
+]
+''';
+
+    final jsonModel = FirebaseAI.googleAI().generativeModel(
+      model: 'gemini-2.5-flash',
+      generationConfig: GenerationConfig(responseMimeType: 'application/json'),
+    );
+
+    final response = await jsonModel.generateContent([Content.text(instructions)]);
+    final text = response.text;
+    if (text != null) {
+      try {
+        final decoded = jsonDecode(text) as List<dynamic>;
+        return decoded.map((q) => Question.fromJson(q as Map<String, dynamic>)).toList();
       } catch (e) {
         return null;
       }

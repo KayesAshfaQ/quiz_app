@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/providers/ai_provider.dart';
+import 'package:quiz_app/models/question.dart';
+import 'package:quiz_app/services/firestore_service.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({super.key});
@@ -54,6 +56,7 @@ class _AiPageState extends State<AiPage> {
     required String text,
     required bool isUser,
     required bool isGenerating,
+    List<Question>? generatedQuiz,
   }) {
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -73,11 +76,39 @@ class _AiPageState extends State<AiPage> {
                 height: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : Text(
-                text,
-                style: TextStyle(
-                  color: isUser ? Colors.white : Colors.black87,
-                ),
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    style: TextStyle(
+                      color: isUser ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  if (generatedQuiz != null) ...[
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          final jsonList = generatedQuiz.map((q) => q.toJson()).toList();
+                          await FirestoreService().saveGeneratedQuiz('AI Generated', jsonList);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Quiz saved to Firestore!')),
+                            );
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error saving quiz: $e')),
+                            );
+                          }
+                        }
+                      },
+                      child: const Text('Store in Firestore'),
+                    ),
+                  ]
+                ],
               ),
       ),
     );
@@ -109,8 +140,21 @@ class _AiPageState extends State<AiPage> {
                       text: message.text,
                       isUser: message.isUser,
                       isGenerating: false,
+                      generatedQuiz: message.generatedQuiz,
                     );
                   },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    const Text('Generate Quiz Mode'),
+                    Switch(
+                      value: provider.isQuizGenerationMode,
+                      onChanged: (val) => provider.toggleQuizGenerationMode(val),
+                    ),
+                  ],
                 ),
               ),
               Padding(
@@ -120,9 +164,9 @@ class _AiPageState extends State<AiPage> {
                     Expanded(
                       child: TextField(
                         controller: _textController,
-                        decoration: const InputDecoration(
-                          hintText: 'Type your message...',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          hintText: provider.isQuizGenerationMode ? 'Topic for quiz...' : 'Type your message...',
+                          border: const OutlineInputBorder(),
                         ),
                         onSubmitted: provider.isGenerating ? null : (_) => _sendMessage(),
                       ),

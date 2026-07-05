@@ -44,4 +44,29 @@ class Question {
       difficulty: difficulty,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    String difficultyString;
+    switch (difficulty) {
+      case 1:
+        difficultyString = 'easy';
+        break;
+      case 3:
+        difficultyString = 'hard';
+        break;
+      case 2:
+      default:
+        difficultyString = 'medium';
+    }
+
+    String correctAnswer = options[correctOptionIndex];
+    List<String> incorrectAnswers = List.from(options)..removeAt(correctOptionIndex);
+
+    return {
+      'question': text,
+      'correct_answer': correctAnswer,
+      'incorrect_answers': incorrectAnswers,
+      'difficulty': difficultyString,
+    };
+  }
 }

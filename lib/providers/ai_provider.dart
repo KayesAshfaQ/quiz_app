@@ -19,7 +19,20 @@ class AiProvider extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  bool _isQuizGenerationMode = false;
+  bool get isQuizGenerationMode => _isQuizGenerationMode;
+
+  void toggleQuizGenerationMode(bool value) {
+    _isQuizGenerationMode = value;
+    notifyListeners();
+  }
+
   void sendMessage(String text) {
+    if (_isQuizGenerationMode) {
+      _generateQuiz(text);
+      return;
+    }
+
     final trimmedText = text.trim();
     if (trimmedText.isEmpty || _isGenerating) return;
 
@@ -57,6 +70,38 @@ class AiProvider extends ChangeNotifier {
       _messages.add(ChatMessage(text: _errorMessage!, isUser: false));
       _isGenerating = false;
       _currentGeneratingText = '';
+      notifyListeners();
+    }
+  }
+
+  void _generateQuiz(String prompt) async {
+    final trimmedPrompt = prompt.trim();
+    if (trimmedPrompt.isEmpty || _isGenerating) return;
+
+    _messages.add(ChatMessage(text: 'Generate a quiz: $trimmedPrompt', isUser: true));
+    _isGenerating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final quiz = await aiRepository.generateQuiz(trimmedPrompt);
+      if (quiz != null && quiz.isNotEmpty) {
+        _messages.add(
+          ChatMessage(
+            text: 'I have generated a quiz for you!',
+            isUser: false,
+            generatedQuiz: quiz,
+          ),
+        );
+      } else {
+        _errorMessage = 'Failed to generate quiz or invalid format.';
+        _messages.add(ChatMessage(text: _errorMessage!, isUser: false));
+      }
+    } catch (e) {
+      _errorMessage = 'Error generating quiz: $e';
+      _messages.add(ChatMessage(text: _errorMessage!, isUser: false));
+    } finally {
+      _isGenerating = false;
       notifyListeners();
     }
   }

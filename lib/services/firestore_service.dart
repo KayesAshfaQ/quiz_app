@@ -130,4 +130,12 @@ class FirestoreService {
     final userRef = _firestore.collection('users').doc(profile.uid);
     await userRef.set(profile.toMap(), SetOptions(merge: true));
   }
+
+  Future<void> saveGeneratedQuiz(String category, List<dynamic> questionsJson) async {
+    await _firestore.collection('generated_quizzes').add({
+      'category': category,
+      'questions': questionsJson,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
 }
