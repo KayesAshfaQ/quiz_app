@@ -1,12 +1,6 @@
-import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/material.dart';
-
-class ChatMessage {
-  final String text;
-  final bool isUser;
-
-  ChatMessage({required this.text, required this.isUser});
-}
+import 'package:provider/provider.dart';
+import 'package:quiz_app/providers/ai_provider.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({super.key});
@@ -16,26 +10,20 @@ class AiPage extends StatefulWidget {
 }
 
 class _AiPageState extends State<AiPage> {
-  final List<ChatMessage> _messages = [];
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  
-  bool _isGenerating = false;
-  Stream<String>? _currentStream;
-  late GenerativeModel _model;
-  late ChatSession _chat;
+  late AiProvider _aiProvider;
 
   @override
   void initState() {
     super.initState();
-    _model = FirebaseAI.googleAI().generativeModel(
-      model: 'gemini-3.5-flash',
-    );
-    _chat = _model.startChat();
+    _aiProvider = context.read<AiProvider>();
+    _aiProvider.addListener(_scrollToBottom);
   }
 
   @override
   void dispose() {
+    _aiProvider.removeListener(_scrollToBottom);
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -53,55 +41,13 @@ class _AiPageState extends State<AiPage> {
     });
   }
 
-  Stream<String> _accumulateStream(Stream<GenerateContentResponse> source) async* {
-    String text = '';
-    try {
-      await for (final chunk in source) {
-        text += chunk.text ?? '';
-        yield text;
-        _scrollToBottom();
-      }
-    } catch (e) {
-      text += '\nError: $e';
-      yield text;
-      _scrollToBottom();
-    } finally {
-      if (mounted) {
-        setState(() {
-          _messages.add(ChatMessage(text: text, isUser: false));
-          _isGenerating = false;
-          _currentStream = null;
-        });
-        _scrollToBottom();
-      }
-    }
-  }
-
   void _sendMessage() {
     final text = _textController.text.trim();
-    if (text.isEmpty || _isGenerating) return;
+    if (text.isEmpty || _aiProvider.isGenerating) return;
 
-    setState(() {
-      _messages.add(ChatMessage(text: text, isUser: true));
-      _isGenerating = true;
-      _textController.clear();
-    });
+    _aiProvider.sendMessage(text);
+    _textController.clear();
     _scrollToBottom();
-
-    try {
-      final responseStream = _chat.sendMessageStream(Content.text(text));
-      setState(() {
-        _currentStream = _accumulateStream(responseStream);
-      });
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isGenerating = false;
-          _messages.add(ChatMessage(text: 'Error generating response.', isUser: false));
-        });
-        _scrollToBottom();
-      }
-    }
   }
 
   Widget _buildMessageBubble({
@@ -141,68 +87,67 @@ class _AiPageState extends State<AiPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Customer Helper Bot')),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: _messages.length + (_isGenerating ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == _messages.length) {
-                  return StreamBuilder<String>(
-                    stream: _currentStream,
-                    builder: (context, snapshot) {
+      body: Consumer<AiProvider>(
+        builder: (context, provider, child) {
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: provider.messages.length + (provider.isGenerating ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == provider.messages.length) {
                       return _buildMessageBubble(
-                        text: snapshot.data ?? '',
+                        text: provider.currentGeneratingText,
                         isUser: false,
                         isGenerating: true,
                       );
-                    },
-                  );
-                }
-                final message = _messages[index];
-                return _buildMessageBubble(
-                  text: message.text,
-                  isUser: message.isUser,
-                  isGenerating: false,
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _textController,
-                    decoration: const InputDecoration(
-                      hintText: 'Type your message...',
-                      border: OutlineInputBorder(),
-                    ),
-                    onSubmitted: _isGenerating ? null : (_) => _sendMessage(),
-                  ),
+                    }
+                    final message = provider.messages[index];
+                    return _buildMessageBubble(
+                      text: message.text,
+                      isUser: message.isUser,
+                      isGenerating: false,
+                    );
+                  },
                 ),
-                const SizedBox(width: 8),
-                _isGenerating
-                    ? const Padding(
-                        padding: EdgeInsets.all(12.0),
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _textController,
+                        decoration: const InputDecoration(
+                          hintText: 'Type your message...',
+                          border: OutlineInputBorder(),
                         ),
-                      )
-                    : IconButton(
-                        icon: const Icon(Icons.send),
-                        color: Theme.of(context).primaryColor,
-                        onPressed: _sendMessage,
+                        onSubmitted: provider.isGenerating ? null : (_) => _sendMessage(),
                       ),
-              ],
-            ),
-          ),
-        ],
+                    ),
+                    const SizedBox(width: 8),
+                    provider.isGenerating
+                        ? const Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.send),
+                            color: Theme.of(context).primaryColor,
+                            onPressed: _sendMessage,
+                          ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -12,14 +12,17 @@ import 'package:quiz_app/repository/auth_repository.dart';
 import 'package:quiz_app/repository/profile_repository.dart';
 import 'package:quiz_app/repository/scoreboard_repository.dart';
 import 'package:quiz_app/repository/quiz_repository.dart';
+import 'package:quiz_app/repository/ai_repository.dart';
 import 'package:quiz_app/services/firestore_service.dart';
 import 'package:quiz_app/services/storage_service.dart';
 import 'package:quiz_app/services/auth_service.dart';
 import 'package:quiz_app/services/hive_storage_service.dart';
 import 'package:quiz_app/services/api_client.dart';
+import 'package:quiz_app/services/ai_service.dart';
 
 import 'app_route.dart';
 import 'providers/quiz_provider.dart';
+import 'providers/ai_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +38,7 @@ void main() async {
   final authService = AuthService();
   final hiveStorageService = HiveStorageService();
   final apiClient = ApiClient();
+  final aiService = AiService();
 
   // Initialize Repositories
   final authRepository = AuthRepository(
@@ -52,12 +56,16 @@ void main() async {
   final quizRepository = QuizRepository(
     apiClient: apiClient,
   );
+  final aiRepository = AiRepository(
+    aiService: aiService,
+  );
 
   runApp(QuizApp(
     authRepository: authRepository,
     profileRepository: profileRepository,
     scoreboardRepository: scoreboardRepository,
     quizRepository: quizRepository,
+    aiRepository: aiRepository,
   ));
 }
 
@@ -66,6 +74,7 @@ class QuizApp extends StatelessWidget {
   final ProfileRepository profileRepository;
   final ScoreboardRepository scoreboardRepository;
   final QuizRepository quizRepository;
+  final AiRepository aiRepository;
 
   const QuizApp({
     super.key,
@@ -73,6 +82,7 @@ class QuizApp extends StatelessWidget {
     required this.profileRepository,
     required this.scoreboardRepository,
     required this.quizRepository,
+    required this.aiRepository,
   });
 
   @override
@@ -86,6 +96,9 @@ class QuizApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(profileRepository: profileRepository),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AiProvider(aiRepository: aiRepository),
         ),
       ],
       child: MaterialApp.router(
