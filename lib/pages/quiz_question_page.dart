@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/providers/quiz_provider.dart';
+import 'package:quiz_app/providers/ai_provider.dart';
+import 'package:firebase_ai/firebase_ai.dart';
 
 import '../app_route.dart';
 
@@ -150,8 +152,82 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
               ),
             ],
           ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _showHintDialog(context, quiz.currentQuestion),
+            child: const Icon(Icons.lightbulb_outline),
+          ),
         );
       },
+    );
+  }
+
+  void _showHintDialog(BuildContext context, Question currentQuestion) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return _HintDialog(currentQuestion: currentQuestion);
+      },
+    );
+  }
+}
+
+class _HintDialog extends StatefulWidget {
+  final Question currentQuestion;
+
+  const _HintDialog({required this.currentQuestion});
+
+  @override
+  State<_HintDialog> createState() => _HintDialogState();
+}
+
+class _HintDialogState extends State<_HintDialog> {
+  late Stream<GenerateContentResponse> _hintStream;
+  String _hintText = '';
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    final aiRepo = context.read<AiProvider>().aiRepository;
+    final prompt = "Give a very short, subtle hint for this quiz question without revealing the answer. Question: ${widget.currentQuestion.text}, Options: ${widget.currentQuestion.options.join(', ')}.";
+    
+    _hintStream = aiRepo.sendMessageStream(prompt);
+    _hintStream.listen(
+      (chunk) {
+        if (mounted) {
+          setState(() {
+            _hintText += chunk.text ?? '';
+          });
+        }
+      },
+      onError: (error) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Error generating hint.';
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Hint'),
+      content: _errorMessage != null
+          ? Text(_errorMessage!)
+          : _hintText.isEmpty
+              ? const SizedBox(
+                  height: 50,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              : SingleChildScrollView(child: Text(_hintText)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
+      ],
     );
   }
 }
