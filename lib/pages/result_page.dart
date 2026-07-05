@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:quiz_app/app_route.dart';
 
 import 'package:quiz_app/models/quiz_result.dart';
+import 'package:quiz_app/providers/ai_provider.dart';
 import 'package:quiz_app/providers/quiz_provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
 import 'package:quiz_app/widgets/score_circle.dart';
@@ -212,6 +213,14 @@ class _ResultPageState extends State<ResultPage> {
                           text: q.options[q.correctOptionIndex],
                           color: Colors.green,
                         ),
+                        if (!isSkipped && !isCorrect) ...[
+                          const SizedBox(height: 12),
+                          _AiExplanationWidget(
+                            question: q.text,
+                            selectedAnswer: q.options[selected],
+                            correctAnswer: q.options[q.correctOptionIndex],
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -356,6 +365,97 @@ class _AnswerRow extends StatelessWidget {
           child: Text(text, style: TextStyle(fontSize: 12, color: color)),
         ),
       ],
+    );
+  }
+}
+
+class _AiExplanationWidget extends StatefulWidget {
+  final String question;
+  final String selectedAnswer;
+  final String correctAnswer;
+
+  const _AiExplanationWidget({
+    required this.question,
+    required this.selectedAnswer,
+    required this.correctAnswer,
+  });
+
+  @override
+  State<_AiExplanationWidget> createState() => _AiExplanationWidgetState();
+}
+
+class _AiExplanationWidgetState extends State<_AiExplanationWidget> {
+  late Future<String?> _explanationFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _explanationFuture = context.read<AiProvider>().aiRepository.generateExplanation(
+      question: widget.question,
+      selectedAnswer: widget.selectedAnswer,
+      correctAnswer: widget.correctAnswer,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String?>(
+      future: _explanationFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Row(
+            children: [
+              SizedBox(
+                width: 12,
+                height: 12,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              SizedBox(width: 8),
+              Text('Generating AI explanation...', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            ],
+          );
+        }
+
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+          return const Text(
+            'Failed to generate explanation.',
+            style: TextStyle(fontSize: 12, color: Colors.red),
+          );
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.auto_awesome, color: Colors.blue, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    'AI Hint',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                snapshot.data!,
+                style: const TextStyle(fontSize: 12, height: 1.4),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

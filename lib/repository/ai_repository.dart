@@ -9,4 +9,16 @@ class AiRepository {
   Stream<GenerateContentResponse> sendMessageStream(String text) {
     return aiService.sendMessageStream(text);
   }
+
+  Future<String?> generateExplanation({
+    required String question,
+    required String selectedAnswer,
+    required String correctAnswer,
+  }) {
+    return aiService.generateExplanation(
+      question: question,
+      selectedAnswer: selectedAnswer,
+      correctAnswer: correctAnswer,
+    );
+  }
 }
