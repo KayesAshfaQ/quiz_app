@@ -28,6 +28,27 @@ class _ResultPageState extends State<ResultPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ScoreboardProvider>().saveQuizResult(widget.result);
+      
+      final wrongAnswers = <Map<String, dynamic>>[];
+      for (var i = 0; i < widget.result.questions.length; i++) {
+        final q = widget.result.questions[i];
+        final selected = widget.result.selectedAnswers[i];
+        final isSkipped = selected == null;
+        final isCorrect = selected == q.correctOptionIndex;
+        
+        if (!isSkipped && !isCorrect) {
+          wrongAnswers.add({
+            'index': i,
+            'question': q.text,
+            'selectedAnswer': q.options[selected],
+            'correctAnswer': q.options[q.correctOptionIndex],
+          });
+        }
+      }
+      
+      if (wrongAnswers.isNotEmpty) {
+        context.read<AiProvider>().fetchExplanationsBatch(wrongAnswers);
+      }
     });
   }
 
@@ -216,9 +237,7 @@ class _ResultPageState extends State<ResultPage> {
                         if (!isSkipped && !isCorrect) ...[
                           const SizedBox(height: 12),
                           _AiExplanationWidget(
-                            question: q.text,
-                            selectedAnswer: q.options[selected],
-                            correctAnswer: q.options[q.correctOptionIndex],
+                            questionIndex: i,
                           ),
                         ],
                       ],
@@ -369,40 +388,18 @@ class _AnswerRow extends StatelessWidget {
   }
 }
 
-class _AiExplanationWidget extends StatefulWidget {
-  final String question;
-  final String selectedAnswer;
-  final String correctAnswer;
+class _AiExplanationWidget extends StatelessWidget {
+  final int questionIndex;
 
   const _AiExplanationWidget({
-    required this.question,
-    required this.selectedAnswer,
-    required this.correctAnswer,
+    required this.questionIndex,
   });
 
   @override
-  State<_AiExplanationWidget> createState() => _AiExplanationWidgetState();
-}
-
-class _AiExplanationWidgetState extends State<_AiExplanationWidget> {
-  late Future<String?> _explanationFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _explanationFuture = context.read<AiProvider>().aiRepository.generateExplanation(
-      question: widget.question,
-      selectedAnswer: widget.selectedAnswer,
-      correctAnswer: widget.correctAnswer,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String?>(
-      future: _explanationFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return Consumer<AiProvider>(
+      builder: (context, aiProvider, child) {
+        if (aiProvider.isGeneratingExplanations) {
           return const Row(
             children: [
               SizedBox(
@@ -416,11 +413,9 @@ class _AiExplanationWidgetState extends State<_AiExplanationWidget> {
           );
         }
 
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-          return const Text(
-            'Failed to generate explanation.',
-            style: TextStyle(fontSize: 12, color: Colors.red),
-          );
+        final explanation = aiProvider.explanations[questionIndex];
+        if (explanation == null) {
+          return const SizedBox.shrink(); // Don't show error to keep UI clean if it fails or hasn't started
         }
 
         return Container(
@@ -449,7 +444,7 @@ class _AiExplanationWidgetState extends State<_AiExplanationWidget> {
               ),
               const SizedBox(height: 6),
               Text(
-                snapshot.data!,
+                explanation,
                 style: const TextStyle(fontSize: 12, height: 1.4),
               ),
             ],

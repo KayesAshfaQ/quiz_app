@@ -60,4 +60,24 @@ class AiProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  bool _isGeneratingExplanations = false;
+  bool get isGeneratingExplanations => _isGeneratingExplanations;
+
+  Map<int, String> _explanations = {};
+  Map<int, String> get explanations => _explanations;
+
+  Future<void> fetchExplanationsBatch(List<Map<String, dynamic>> wrongAnswers) async {
+    if (wrongAnswers.isEmpty) return;
+    _isGeneratingExplanations = true;
+    _explanations = {};
+    notifyListeners();
+
+    final result = await aiRepository.generateExplanationsBatch(wrongAnswers);
+    if (result != null) {
+      _explanations = result;
+    }
+    _isGeneratingExplanations = false;
+    notifyListeners();
+  }
 }
