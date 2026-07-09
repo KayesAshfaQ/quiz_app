@@ -13,6 +13,7 @@ import 'pages/profile_page.dart';
 import 'pages/quiz_loading_page.dart';
 import 'pages/quiz_management_page.dart';
 import 'pages/quiz_question_page.dart';
+import 'pages/subscription_page.dart';
 import 'utils/go_route_refresh_stream.dart';
 
 class AppRoute {
@@ -26,6 +27,7 @@ class AppRoute {
   static const String scoreboard = '/scoreboard';
   static const String profile = '/profile';
   static const String ai = '/ai-interaction';
+  static const String subscription = '/subscription';
 
   static final routes = GoRouter(
     initialLocation: login,
@@ -77,6 +79,10 @@ class AppRoute {
         builder: (context, state) => ProfilePage(),
       ),
       GoRoute(path: AppRoute.ai, builder: (context, state) => AiPage()),
+      GoRoute(
+        path: AppRoute.subscription,
+        builder: (context, state) => SubscriptionPage(),
+      ),
     ],
   );
 }

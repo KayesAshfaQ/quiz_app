@@ -121,6 +121,14 @@ class _CategoryPageState extends State<CategoryPage> {
               Tab(text: 'New', icon: Icon(Icons.new_releases)),
             ],
           ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.access_time_filled),
+              onPressed: () {
+                context.push(AppRoute.subscription);
+              },
+            ),
+          ],
         ),
         body: TabBarView(
           children: [

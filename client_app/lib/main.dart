@@ -7,6 +7,7 @@ import 'package:quiz_app/models/scoreboard_entry.dart';
 import 'package:quiz_app/providers/auth_provider.dart';
 import 'package:quiz_app/providers/profile_provider.dart';
 import 'package:quiz_app/providers/scoreboard_provider.dart';
+import 'package:quiz_app/providers/subscription_provider.dart';
 
 import 'package:quiz_app/repository/auth_repository.dart';
 import 'package:quiz_app/repository/profile_repository.dart';
@@ -99,6 +100,9 @@ class QuizApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => AiProvider(aiRepository: aiRepository),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SubscriptionProvider(),
         ),
       ],
       child: MaterialApp.router(

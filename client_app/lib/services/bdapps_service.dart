@@ -1,0 +1,69 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+
+class BdAppsService {
+  // Cloud Run Production URL
+  static const String _baseUrl = 'https://bdapps-api-388385014884.asia-south1.run.app';
+  late Dio _dio;
+
+  BdAppsService() {
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: _baseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+      ),
+    );
+
+    _dio.interceptors.add(LogInterceptor(responseBody: true, requestBody: true));
+  }
+
+  Future<Map<String, dynamic>> sendOtp(String mobileNumber) async {
+    try {
+      final response = await _dio.post('/otp/send', data: {
+        'user_mobile': mobileNumber,
+      });
+      return response.data;
+    } catch (e) {
+      debugPrint('Error sending OTP: $e');
+      throw Exception('Failed to send OTP: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyOtp(String referenceNo, String otp) async {
+    try {
+      final response = await _dio.post('/otp/verify', data: {
+        'referenceNo': referenceNo,
+        'otp': otp,
+      });
+      return response.data;
+    } catch (e) {
+      debugPrint('Error verifying OTP: $e');
+      throw Exception('Failed to verify OTP: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> checkSubscription(String mobileNumber) async {
+    try {
+      final response = await _dio.post('/subscription/check', data: {
+        'user_mobile': mobileNumber,
+      });
+      return response.data;
+    } catch (e) {
+      debugPrint('Error checking subscription: $e');
+      throw Exception('Failed to check subscription: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> unsubscribe(String mobileNumber) async {
+    try {
+      final response = await _dio.post('/subscription/unsubscribe', data: {
+        'user_mobile': mobileNumber,
+      });
+      return response.data;
+    } catch (e) {
+      debugPrint('Error unsubscribing: $e');
+      throw Exception('Failed to unsubscribe: $e');
+    }
+  }
+}
