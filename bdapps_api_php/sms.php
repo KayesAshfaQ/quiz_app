@@ -1,11 +1,12 @@
 <?php
 
 ini_set('error_log', 'sms-app-error.log');
+require_once 'config.php';
 require 'sdk_file.php';
 
 
-$appid = "APP_137539";
-$apppassword = "c2dd7d7ab475be8a6175f3f318856541";
+$appid = BDAPPS_APP_ID;
+$apppassword = BDAPPS_PASSWORD;
 $logger = new Logger();
 
 try{

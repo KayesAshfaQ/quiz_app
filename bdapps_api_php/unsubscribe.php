@@ -1,5 +1,7 @@
 <?php
 
+require_once 'config.php';
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -67,8 +69,8 @@ if (strlen($digits) !== 11 || $digits[0] !== '0') {
 }
 
 $subscriberId = 'tel:88' . $digits;
-$appId = 'APP_137539';
-$password = 'c2dd7d7ab475be8a6175f3f318856541';
+$appId = BDAPPS_APP_ID;
+$password = BDAPPS_PASSWORD;
 
 $requestData = array(
     'applicationId' => $appId,

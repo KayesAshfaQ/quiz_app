@@ -1,11 +1,12 @@
 <?php
 
 ini_set('error_log', 'ussd-app-error.log');
+require_once 'config.php';
 require 'sdk_file.php';
 $date_= date("Y-m-d h:i:sa");
 
-$appid = "APP_137539";
-$apppassword = "c2dd7d7ab475be8a6175f3f318856541";
+$appid = BDAPPS_APP_ID;
+$apppassword = BDAPPS_PASSWORD;
 
 $sender = new SmsSender("https://developer.bdapps.com/sms/send", $appid,$apppassword);
 

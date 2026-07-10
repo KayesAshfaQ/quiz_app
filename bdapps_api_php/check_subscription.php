@@ -1,5 +1,7 @@
 <?php
 
+require_once 'config.php';
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -35,8 +37,8 @@ $subscriberId = 'tel:88' . $digits;
 
 $requestData = [
     'version' => '1.0',
-    'applicationId' => 'APP_137539',
-    'password' => 'c2dd7d7ab475be8a6175f3f318856541',
+    'applicationId' => BDAPPS_APP_ID,
+    'password' => BDAPPS_PASSWORD,
     'subscriberId' => $subscriberId,
 ];
 

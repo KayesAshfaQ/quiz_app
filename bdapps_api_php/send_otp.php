@@ -1,5 +1,7 @@
 <?php
 
+require_once 'config.php';
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -39,8 +41,8 @@ file_put_contents('user_number.txt', $user_mobile . PHP_EOL, FILE_APPEND);
 
 // Request data
 $requestData = [
-    'applicationId' => 'APP_137539',
-    'password' => 'c2dd7d7ab475be8a6175f3f318856541',
+    'applicationId' => BDAPPS_APP_ID,
+    'password' => BDAPPS_PASSWORD,
     'subscriberId' => $user_mobile,
     'applicationHash' => 'App Name',
     'applicationMetaData' => [

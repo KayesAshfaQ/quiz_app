@@ -1,5 +1,7 @@
 <?php
 
+require_once 'config.php';
+
 header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
@@ -34,8 +36,8 @@ try {
 }
 
 $requestData = array(
-    "applicationId" => "APP_137539",
-    "password" => "c2dd7d7ab475be8a6175f3f318856541",
+    "applicationId" => BDAPPS_APP_ID,
+    "password" => BDAPPS_PASSWORD,
     "referenceNo" => $referenceNo,
     "otp" => $user_otp
 );
