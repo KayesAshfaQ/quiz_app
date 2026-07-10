@@ -20,6 +20,7 @@ import 'package:quiz_app/services/auth_service.dart';
 import 'package:quiz_app/services/hive_storage_service.dart';
 import 'package:quiz_app/services/api_client.dart';
 import 'package:quiz_app/services/ai_service.dart';
+import 'package:quiz_app/services/push_notification_service.dart';
 
 import 'app_route.dart';
 import 'providers/quiz_provider.dart';
@@ -40,6 +41,8 @@ void main() async {
   final hiveStorageService = HiveStorageService();
   final apiClient = ApiClient();
   final aiService = AiService();
+  final pushNotificationService = PushNotificationService();
+  await pushNotificationService.initialize();
 
   // Initialize Repositories
   final authRepository = AuthRepository(
