@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:quiz_app/app_route.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -116,5 +117,62 @@ class PushNotificationService {
         );
       }
     });
+
+    // Setup handling for interacted messages (tapped notifications)
+    await _setupInteractedMessage();
+  }
+
+  Future<void> _setupInteractedMessage() async {
+    // 1. Terminated state
+    // Get any messages which caused the application to open from
+    // a terminated state.
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance
+        .getInitialMessage();
+
+    if (initialMessage != null) {
+      _handleMessage(initialMessage, isInitial: true);
+    }
+
+    // 2. Background state
+    // Handle any interaction when the app is in the background via a
+    // Stream listener
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      _handleMessage(message, isInitial: false);
+    });
+  }
+
+  void _handleMessage(RemoteMessage message, {bool isInitial = false}) {
+    if (kDebugMode) {
+      print(
+        'PushNotificationService: Handling interacted message: ${message.messageId}',
+      );
+      print('Message data payload: ${message.data}');
+    }
+
+    try {
+      final data = message.data;
+      // Safely extract the target path
+      if (data.containsKey('path')) {
+        final path = data['path'];
+        if (path != null && path is String && path.isNotEmpty) {
+          if (isInitial) {
+            // Delay navigation for terminated state to allow go_router to fully mount
+            // and auth state to resolve before pushing the route.
+            Future.delayed(const Duration(milliseconds: 1000), () {
+              AppRoute.routes.push(path);
+            });
+          } else {
+            // App is already running in background, safe to push immediately
+            AppRoute.routes.push(path);
+          }
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+          'PushNotificationService: Error parsing route from FCM message: $e',
+        );
+      }
+    }
   }
 }
