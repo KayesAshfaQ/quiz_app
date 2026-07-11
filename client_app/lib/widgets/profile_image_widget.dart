@@ -4,12 +4,14 @@ class ProfileImageWidget extends StatelessWidget {
   final String? currentImageUrl;
   final bool isLoading;
   final VoidCallback? onEditTap;
+  final double radius;
 
   const ProfileImageWidget({
     super.key,
     this.currentImageUrl,
     this.isLoading = false,
     this.onEditTap,
+    this.radius = 46.0,
   });
 
   @override
@@ -26,7 +28,7 @@ class ProfileImageWidget extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: CircleAvatar(
-              radius: 46,
+              radius: radius,
               backgroundColor: const Color(0xFFF0EFFF),
               backgroundImage: currentImageUrl != null && !isLoading
                   ? NetworkImage(currentImageUrl!)
@@ -34,10 +36,10 @@ class ProfileImageWidget extends StatelessWidget {
               child: isLoading
                   ? const CircularProgressIndicator()
                   : (currentImageUrl == null
-                        ? const Icon(
+                        ? Icon(
                             Icons.person,
-                            size: 50,
-                            color: Color(0xFF6B58E9),
+                            size: radius * 1.1,
+                            color: const Color(0xFF6B58E9),
                           )
                         : null),
             ),
@@ -46,15 +48,15 @@ class ProfileImageWidget extends StatelessWidget {
             bottom: 0,
             right: 0,
             child: Container(
-              width: 28,
-              height: 28,
+              width: radius * 0.6,
+              height: radius * 0.6,
               decoration: BoxDecoration(
                 color: const Color(0xFF6B58E9),
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 2),
               ),
-              child: const Center(
-                child: Icon(Icons.edit, size: 14, color: Colors.white),
+              child: Center(
+                child: Icon(Icons.edit, size: radius * 0.3, color: Colors.white),
               ),
             ),
           ),

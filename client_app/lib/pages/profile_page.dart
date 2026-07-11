@@ -8,6 +8,143 @@ import 'package:quiz_app/widgets/edit_profile_dialogue.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:quiz_app/widgets/profile_image_widget.dart';
 import 'package:quiz_app/widgets/score_card_widget.dart';
+import 'package:quiz_app/models/user.dart';
+
+class _ProfileHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final double expandedHeight;
+  final User? profile;
+  final bool isUploadingImage;
+  final VoidCallback onEditImage;
+  final VoidCallback onEditProfile;
+  final VoidCallback onLogout;
+  final double minHeight;
+
+  _ProfileHeaderDelegate({
+    required this.expandedHeight,
+    required this.profile,
+    required this.isUploadingImage,
+    required this.onEditImage,
+    required this.onEditProfile,
+    required this.onLogout,
+    required this.minHeight,
+  });
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    final double safeAreaTop = MediaQuery.of(context).padding.top;
+    final double maxExtent = this.maxExtent;
+
+    final double progress = (shrinkOffset / (maxExtent - minHeight)).clamp(
+      0.0,
+      1.0,
+    );
+
+    final double maxAvatarRadius = 46.0;
+    final double minAvatarRadius = 18.0;
+    final double currentAvatarRadius =
+        maxAvatarRadius - ((maxAvatarRadius - minAvatarRadius) * progress);
+    final double currentAvatarSize = currentAvatarRadius * 2;
+
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double avatarLeftExpanded = (screenWidth - currentAvatarSize) / 2;
+    final double avatarLeftCollapsed = 16.0;
+    final double currentAvatarLeft =
+        avatarLeftExpanded -
+        ((avatarLeftExpanded - avatarLeftCollapsed) * progress);
+
+    final double avatarTopExpanded = maxExtent - currentAvatarRadius;
+    final double avatarTopCollapsed =
+        safeAreaTop + (kToolbarHeight - currentAvatarSize) / 2;
+    final double currentAvatarTop =
+        avatarTopExpanded +
+        ((avatarTopCollapsed - avatarTopExpanded) * progress);
+
+    final double titleLeftExpanded = 16.0;
+    final double titleLeftCollapsed = 16.0 + (minAvatarRadius * 2) + 16.0;
+    final double currentTitleLeft =
+        titleLeftExpanded +
+        ((titleLeftCollapsed - titleLeftExpanded) * progress);
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(color: const Color(0xFF6B58E9)),
+        Positioned(
+          top: safeAreaTop,
+          left: 0,
+          right: 0,
+          height: kToolbarHeight,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SizedBox(),
+              Row(
+                children: [
+                  if (profile != null)
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.white),
+                      onPressed: onEditProfile,
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.logout, color: Colors.white),
+                    onPressed: onLogout,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Positioned(
+          top: safeAreaTop + (kToolbarHeight - 24) / 2,
+          left: currentTitleLeft,
+          child: const Text(
+            'Profile',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Positioned(
+          top: currentAvatarTop,
+          left: currentAvatarLeft,
+          child: GestureDetector(
+            onTap: progress < 0.5 ? onEditImage : null,
+            child: SizedBox(
+              width: currentAvatarSize,
+              height: currentAvatarSize,
+              child: ProfileImageWidget(
+                currentImageUrl: profile?.avatarUrl,
+                isLoading: isUploadingImage,
+                onEditTap: progress < 0.5 ? onEditImage : null,
+                radius: currentAvatarRadius,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  double get maxExtent => expandedHeight;
+
+  @override
+  double get minExtent => minHeight;
+
+  @override
+  bool shouldRebuild(covariant _ProfileHeaderDelegate oldDelegate) {
+    return expandedHeight != oldDelegate.expandedHeight ||
+        profile != oldDelegate.profile ||
+        isUploadingImage != oldDelegate.isUploadingImage ||
+        minHeight != oldDelegate.minHeight;
+  }
+}
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -77,335 +214,271 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF6B58E9),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
+      body: CustomScrollView(
+        slivers: [
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _ProfileHeaderDelegate(
+              expandedHeight: 200,
+              minHeight: MediaQuery.of(context).padding.top + kToolbarHeight,
+              profile: profile,
+              isUploadingImage: profileProvider.isUploadingImage,
+              onEditImage: _showImageSourceDialog,
+              onEditProfile: () {
+                if (profile != null) {
+                  showDialog(
+                    context: context,
+                    builder: (context) =>
+                        EditProfileDialog(currentProfile: profile),
+                  );
+                }
+              },
+              onLogout: () {
+                context.read<AuthProvider>().logout();
+              },
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Profile',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: 60,
+                  left: 24,
+                  right: 24,
+                  bottom: 16,
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      profile?.displayName ?? 'Unknown User',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2C2C2C),
+                      ),
                     ),
-                  ),
-                  Row(
-                    children: [
-                      if (profile != null)
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.white),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) =>
-                                  EditProfileDialog(currentProfile: profile),
-                            );
-                          },
+                    if (profile?.bio != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        profile!.bio!,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
                         ),
-                      IconButton(
-                        icon: const Icon(Icons.logout, color: Colors.white),
-                        onPressed: () {
-                          context.read<AuthProvider>().logout();
-                        },
+                        textAlign: TextAlign.center,
                       ),
                     ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 50),
-            Expanded(
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // Main White Container
-                  Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(32),
-                        topRight: Radius.circular(32),
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6B58E9),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: 60,
-                        left: 24,
-                        right: 24,
-                      ),
-                      child: Column(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          // User Name
-                          Text(
-                            profile?.displayName ??
-                                'Unknown User', // Fallback if displayName is null
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2C2C2C),
-                            ),
+                          _buildStatItem(
+                            Icons.star_border,
+                            'POINTS',
+                            profile?.score.toString() ?? '0',
                           ),
-                          if (profile?.bio != null) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              profile!.bio!,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                          const SizedBox(height: 24),
-                          // Stats Card
                           Container(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF6B58E9),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                _buildStatItem(
-                                  Icons.star_border,
-                                  'POINTS',
-                                  profile?.score.toString() ?? '0',
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 40,
-                                  color: Colors.white.withValues(alpha: 0.3),
-                                ),
-                                _buildStatItem(
-                                  Icons.public,
-                                  'WORLD RANK',
-                                  profile?.rank ?? '-',
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 40,
-                                  color: Colors.white.withValues(alpha: 0.3),
-                                ),
-                                _buildStatItem(
-                                  Icons.local_police_outlined,
-                                  'LOCAL RANK',
-                                  '#56',
-                                ),
-                              ],
-                            ),
+                            width: 1,
+                            height: 40,
+                            color: Colors.white.withValues(alpha: 0.3),
                           ),
-                          const SizedBox(height: 24),
-                          // Tabs
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              const Text(
-                                'Badge',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const Text(
-                                'Stats',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  const Text(
-                                    'Details',
-                                    style: TextStyle(
-                                      color: Color(0xFF6B58E9),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const CircleAvatar(
-                                    radius: 3,
-                                    backgroundColor: Color(0xFF6B58E9),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          _buildStatItem(
+                            Icons.public,
+                            'WORLD RANK',
+                            profile?.rank ?? '-',
                           ),
-                          const SizedBox(height: 24),
-                          // Recent Matches Header
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Recent matches',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF2C2C2C),
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                  ),
-                                ),
-                                child: Selector<ProfileProvider, String>(
-                                  selector: (_, provider) =>
-                                      provider.selectedProfileFilter,
-                                  builder:
-                                      (
-                                        BuildContext context,
-                                        String value,
-                                        Widget? child,
-                                      ) {
-                                        return PopupMenuButton<String>(
-                                          initialValue: value,
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                value,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              const Icon(
-                                                Icons.keyboard_arrow_down,
-                                                size: 16,
-                                              ),
-                                            ],
-                                          ),
-                                          onSelected: (value) {
-                                            context
-                                                    .read<ProfileProvider>()
-                                                    .selectedProfileFilter =
-                                                value;
-                                          },
-                                          itemBuilder: (context) => const [
-                                            PopupMenuItem(
-                                              value: 'Daily',
-                                              child: Text('Daily'),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'Monthly',
-                                              child: Text('Monthly'),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'Yearly',
-                                              child: Text('Yearly'),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'All',
-                                              child: Text('All'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                ),
-                              ),
-                            ],
+                          Container(
+                            width: 1,
+                            height: 40,
+                            color: Colors.white.withValues(alpha: 0.3),
                           ),
-                          const SizedBox(height: 16),
-                          // Matches List
-                          Expanded(
-                            child: Consumer<ProfileProvider>(
-                              builder: (context, provider, child) {
-                                if (provider.isLoadingPersonalHistory) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-
-                                final history = provider.personalHistory;
-
-                                if (history.isEmpty) {
-                                  return Column(
-                                    children: [
-                                      const SizedBox(height: 50),
-                                      const Text(
-                                        'No recent matches found.',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 20),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          context
-                                              .read<ProfileProvider>()
-                                              .loadPersonalResults();
-                                        },
-                                        child: const Text('refresh'),
-                                      ),
-                                    ],
-                                  );
-                                }
-
-                                return ListView.builder(
-                                  itemCount: history.length,
-                                  itemBuilder: (context, index) {
-                                    final score = history[index];
-
-                                    return ScoreCardWidget(entry: score);
-                                  },
-                                );
-                              },
-                            ),
+                          _buildStatItem(
+                            Icons.local_police_outlined,
+                            'LOCAL RANK',
+                            '#56',
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  // Avatar Widget (Positioned to overlap)
-                  Positioned(
-                    top: -50,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: profile != null
-                          ? ProfileImageWidget(
-                              currentImageUrl: profile.avatarUrl,
-                              isLoading: profileProvider.isUploadingImage,
-                              onEditTap: () => _showImageSourceDialog(),
-                            )
-                          : const CircleAvatar(
-                              radius: 50,
-                              backgroundColor: Color(0xFFF0EFFF),
-                              child: Icon(
-                                Icons.person,
-                                size: 50,
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const Text(
+                          'Badge',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Text(
+                          'Stats',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Column(
+                          children: [
+                            const Text(
+                              'Details',
+                              style: TextStyle(
                                 color: Color(0xFF6B58E9),
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
+                            const SizedBox(height: 4),
+                            const CircleAvatar(
+                              radius: 3,
+                              backgroundColor: Color(0xFF6B58E9),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Recent matches',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2C2C2C),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Selector<ProfileProvider, String>(
+                            selector: (_, provider) =>
+                                provider.selectedProfileFilter,
+                            builder: (context, value, child) {
+                              return PopupMenuButton<String>(
+                                initialValue: value,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      value,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(
+                                      Icons.keyboard_arrow_down,
+                                      size: 16,
+                                    ),
+                                  ],
+                                ),
+                                onSelected: (value) {
+                                  context
+                                          .read<ProfileProvider>()
+                                          .selectedProfileFilter =
+                                      value;
+                                },
+                                itemBuilder: (context) => const [
+                                  PopupMenuItem(
+                                    value: 'Daily',
+                                    child: Text('Daily'),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'Monthly',
+                                    child: Text('Monthly'),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'Yearly',
+                                    child: Text('Yearly'),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'All',
+                                    child: Text('All'),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+          Consumer<ProfileProvider>(
+            builder: (context, provider, child) {
+              if (provider.isLoadingPersonalHistory) {
+                return const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              final history = provider.personalHistory;
+
+              if (history.isEmpty) {
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Container(
+                    color: Colors.white,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 50),
+                        const Text(
+                          'No recent matches found.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            context
+                                .read<ProfileProvider>()
+                                .loadPersonalResults();
+                          },
+                          child: const Text('refresh'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              return SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final score = history[index];
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    color: Colors.white,
+                    child: ScoreCardWidget(entry: score),
+                  );
+                }, childCount: history.length),
+              );
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to the Ai interaction page
           context.push(AppRoute.ai);
         },
         child: const Icon(Icons.bolt, color: Color(0xFF6B58E9)),
