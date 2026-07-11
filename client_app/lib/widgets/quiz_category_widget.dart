@@ -35,6 +35,8 @@ class QuizCategoryWidget extends StatelessWidget {
                   child: Text(
                     category.name,
                     style: Theme.of(context).textTheme.titleSmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
