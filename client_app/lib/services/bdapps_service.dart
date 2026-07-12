@@ -23,8 +23,8 @@ class BdAppsService {
   Future<Map<String, dynamic>> sendOtp(String mobileNumber) async {
     try {
       final response = await _dio.post(
-        '/otp/send',
-        data: {'user_mobile': mobileNumber},
+        '/send_otp.php',
+        data: FormData.fromMap({'user_mobile': mobileNumber}),
       );
       return response.data;
     } catch (e) {
@@ -36,8 +36,8 @@ class BdAppsService {
   Future<Map<String, dynamic>> verifyOtp(String referenceNo, String otp) async {
     try {
       final response = await _dio.post(
-        '/otp/verify',
-        data: {'referenceNo': referenceNo, 'otp': otp},
+        '/verify_otp.php',
+        data: FormData.fromMap({'referenceNo': referenceNo, 'Otp': otp}),
       );
       return response.data;
     } catch (e) {
@@ -49,8 +49,8 @@ class BdAppsService {
   Future<Map<String, dynamic>> checkSubscription(String mobileNumber) async {
     try {
       final response = await _dio.post(
-        '/subscription/check',
-        data: {'user_mobile': mobileNumber},
+        '/check_subscription.php',
+        data: FormData.fromMap({'user_mobile': mobileNumber}),
       );
       return response.data;
     } catch (e) {
@@ -62,8 +62,8 @@ class BdAppsService {
   Future<Map<String, dynamic>> unsubscribe(String mobileNumber) async {
     try {
       final response = await _dio.post(
-        '/subscription/unsubscribe',
-        data: {'user_mobile': mobileNumber},
+        '/unsubscribe.php',
+        data: FormData.fromMap({'user_mobile': mobileNumber}),
       );
       return response.data;
     } catch (e) {
