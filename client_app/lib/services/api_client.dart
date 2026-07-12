@@ -7,8 +7,8 @@ class ApiClient {
   static const String _baseUrl = 'https://opentdb.com/api.php';
   late Dio _dio;
 
-  ApiClient() {
-    _dio = Dio(
+  ApiClient({Dio? dio}) {
+    _dio = dio ?? Dio(
       BaseOptions(
         baseUrl: _baseUrl,
         connectTimeout: const Duration(seconds: 10),

@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 
 class BdAppsService {
   // Cloud Run Production URL
-  static const String _baseUrl = 'https://bdapps-api-388385014884.asia-south1.run.app';
+  static const String _baseUrl = 'https://quiz.solobit.dev';
   late Dio _dio;
 
   BdAppsService() {
@@ -15,14 +15,17 @@ class BdAppsService {
       ),
     );
 
-    _dio.interceptors.add(LogInterceptor(responseBody: true, requestBody: true));
+    _dio.interceptors.add(
+      LogInterceptor(responseBody: true, requestBody: true),
+    );
   }
 
   Future<Map<String, dynamic>> sendOtp(String mobileNumber) async {
     try {
-      final response = await _dio.post('/otp/send', data: {
-        'user_mobile': mobileNumber,
-      });
+      final response = await _dio.post(
+        '/otp/send',
+        data: {'user_mobile': mobileNumber},
+      );
       return response.data;
     } catch (e) {
       debugPrint('Error sending OTP: $e');
@@ -32,10 +35,10 @@ class BdAppsService {
 
   Future<Map<String, dynamic>> verifyOtp(String referenceNo, String otp) async {
     try {
-      final response = await _dio.post('/otp/verify', data: {
-        'referenceNo': referenceNo,
-        'otp': otp,
-      });
+      final response = await _dio.post(
+        '/otp/verify',
+        data: {'referenceNo': referenceNo, 'otp': otp},
+      );
       return response.data;
     } catch (e) {
       debugPrint('Error verifying OTP: $e');
@@ -45,9 +48,10 @@ class BdAppsService {
 
   Future<Map<String, dynamic>> checkSubscription(String mobileNumber) async {
     try {
-      final response = await _dio.post('/subscription/check', data: {
-        'user_mobile': mobileNumber,
-      });
+      final response = await _dio.post(
+        '/subscription/check',
+        data: {'user_mobile': mobileNumber},
+      );
       return response.data;
     } catch (e) {
       debugPrint('Error checking subscription: $e');
@@ -57,9 +61,10 @@ class BdAppsService {
 
   Future<Map<String, dynamic>> unsubscribe(String mobileNumber) async {
     try {
-      final response = await _dio.post('/subscription/unsubscribe', data: {
-        'user_mobile': mobileNumber,
-      });
+      final response = await _dio.post(
+        '/subscription/unsubscribe',
+        data: {'user_mobile': mobileNumber},
+      );
       return response.data;
     } catch (e) {
       debugPrint('Error unsubscribing: $e');

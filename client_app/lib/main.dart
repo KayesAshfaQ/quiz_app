@@ -112,7 +112,7 @@ class QuizApp extends StatelessWidget {
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          colorScheme: .fromSeed(seedColor: Colors.indigo),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
           textTheme: TextTheme(
             titleSmall: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
