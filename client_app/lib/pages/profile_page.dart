@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/app_route.dart';
@@ -85,13 +86,27 @@ class _ProfileHeaderDelegate extends SliverPersistentHeaderDelegate {
               Row(
                 children: [
                   if (profile != null)
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.white),
-                      onPressed: onEditProfile,
+                    Semantics(
+                      label: 'Edit Profile',
+                      child: IconButton(
+                        tooltip: 'Edit Profile',
+                        icon: const Icon(Icons.edit, color: Colors.white),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          onEditProfile();
+                        },
+                      ),
                     ),
-                  IconButton(
-                    icon: const Icon(Icons.logout, color: Colors.white),
-                    onPressed: onLogout,
+                  Semantics(
+                    label: 'Logout',
+                    child: IconButton(
+                      tooltip: 'Logout',
+                      icon: const Icon(Icons.logout, color: Colors.white),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        onLogout();
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -477,11 +492,16 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push(AppRoute.ai);
-        },
-        child: const Icon(Icons.bolt, color: Color(0xFF6B58E9)),
+      floatingActionButton: Semantics(
+        label: 'AI Chat',
+        child: FloatingActionButton(
+          tooltip: 'AI Chat',
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            context.push(AppRoute.ai);
+          },
+          child: const Icon(Icons.bolt, color: Color(0xFF6B58E9)),
+        ),
       ),
     );
   }

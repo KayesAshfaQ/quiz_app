@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/models/question.dart';
@@ -152,9 +153,16 @@ class _QuizQuestionPageState extends State<QuizQuestionPage> {
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showHintDialog(context, quiz.currentQuestion),
-            child: const Icon(Icons.lightbulb_outline),
+          floatingActionButton: Semantics(
+            label: 'Request AI Hint',
+            child: FloatingActionButton(
+              tooltip: 'Request AI Hint',
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                _showHintDialog(context, quiz.currentQuestion);
+              },
+              child: const Icon(Icons.lightbulb_outline),
+            ),
           ),
         );
       },

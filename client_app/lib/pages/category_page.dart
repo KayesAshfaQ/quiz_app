@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quiz_app/models/quiz_category.dart';
 
@@ -132,11 +133,16 @@ class _CategoryPageState extends State<CategoryPage> {
             ],
           ),
           actions: [
-            IconButton(
-              icon: Icon(Icons.access_time_filled),
-              onPressed: () {
-                context.push(AppRoute.subscription);
-              },
+            Semantics(
+              label: 'Subscriptions',
+              child: IconButton(
+                tooltip: 'Subscriptions',
+                icon: Icon(Icons.access_time_filled),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.push(AppRoute.subscription);
+                },
+              ),
             ),
           ],
         ),
@@ -147,12 +153,16 @@ class _CategoryPageState extends State<CategoryPage> {
             CategoryTypeWidget(categories: _filterCategories('New')),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          tooltip: 'Manage Quizzes',
-          child: const Icon(Icons.add),
-          onPressed: () {
-            context.push(AppRoute.quizManagement);
-          },
+        floatingActionButton: Semantics(
+          label: 'Manage Quizzes',
+          child: FloatingActionButton(
+            tooltip: 'Manage Quizzes',
+            child: const Icon(Icons.add),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              context.push(AppRoute.quizManagement);
+            },
+          ),
         ),
       ),
     );

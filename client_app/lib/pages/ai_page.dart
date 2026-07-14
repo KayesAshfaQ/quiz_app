@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/providers/ai_provider.dart';
 import 'package:quiz_app/models/question.dart';
@@ -181,10 +182,17 @@ class _AiPageState extends State<AiPage> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                           )
-                        : IconButton(
-                            icon: const Icon(Icons.send),
-                            color: Theme.of(context).primaryColor,
-                            onPressed: _sendMessage,
+                        : Semantics(
+                            label: 'Send Message',
+                            child: IconButton(
+                              tooltip: 'Send Message',
+                              icon: const Icon(Icons.send),
+                              color: Theme.of(context).primaryColor,
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                _sendMessage();
+                              },
+                            ),
                           ),
                   ],
                 ),

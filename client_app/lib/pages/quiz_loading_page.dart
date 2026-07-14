@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/app_route.dart';
@@ -32,9 +33,16 @@ class _QuizLoadingPageState extends State<QuizLoadingPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Loading Quiz'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go(AppRoute.home),
+        leading: Semantics(
+          label: 'Go Back',
+          child: IconButton(
+            tooltip: 'Go Back',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              context.go(AppRoute.home);
+            },
+          ),
         ),
       ),
       body: FutureBuilder<List<Question>>(
