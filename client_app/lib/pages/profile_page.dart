@@ -228,7 +228,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final profile = profileProvider.userProfile;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF6B58E9),
+      // backgroundColor: const Color(0xFF6B58E9),
       body: CustomScrollView(
         slivers: [
           SliverPersistentHeader(
