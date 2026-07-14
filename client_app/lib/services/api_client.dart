@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/question.dart';
 
@@ -8,13 +10,15 @@ class ApiClient {
   late Dio _dio;
 
   ApiClient({Dio? dio}) {
-    _dio = dio ?? Dio(
-      BaseOptions(
-        baseUrl: _baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-      ),
-    );
+    _dio =
+        dio ??
+        Dio(
+          BaseOptions(
+            baseUrl: _baseUrl,
+            connectTimeout: const Duration(seconds: 10),
+            receiveTimeout: const Duration(seconds: 10),
+          ),
+        );
 
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -34,47 +38,46 @@ class ApiClient {
     );
   }
 
-  Future<List<Question>> fetchQuestions({int amount = 10, String difficulty = 'medium'}) async {
-    final response = await _dio.get(
-      '',
-      queryParameters: {
-        'amount': amount,
-        'difficulty': difficulty,
-      },
-    );
+  Future<List<Question>> fetchQuestions({
+    int amount = 10,
+    String difficulty = 'medium',
+  }) async {
+    try {
+      final response = await _dio.get(
+        '',
+        queryParameters: {'amount': amount, 'difficulty': difficulty},
+      );
 
-    if (response.statusCode == 200) {
-      final data = response.data;
-      final List<Question> questions = (data['results'] as List)
-          .map((json) => Question.fromJson(json))
-          .toList();
-      debugPrint('Fetched ${questions.length} questions from API');
-      return questions;
-    } else {
-      throw Exception('Failed to fetch questions');
-    }
-  }
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List<Question> questions = (data['results'] as List)
+            .map((json) => Question.fromJson(json))
+            .toList();
+        debugPrint('Fetched ${questions.length} questions from API');
 
+        final prefs = await SharedPreferences.getInstance();
+        final jsonString = jsonEncode(
+          questions.map((q) => q.toJson()).toList(),
+        );
+        await prefs.setString('cached_questions', jsonString);
 
-  Future<List<Question>> fetchTdb() async {
-    final response = await _dio.get(
-      '',
-      queryParameters: {
-        'amount': 10,
-        'category': 18,
-        'difficulty': 'medium',
-        'type': 'multiple',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final List<Question> questions = (response.data['results'] as List)
-          .map((json) => Question.fromJson(json))
-          .toList();
-      debugPrint('Fetched ${questions.length} questions from API');
-      return questions;
-    } else {
-      throw Exception('Failed to fetch Tdb data');
+        return questions;
+      } else {
+        throw Exception('Failed to fetch questions');
+      }
+    } catch (e) {
+      debugPrint('Network error, attempting to load from cache: $e');
+      final prefs = await SharedPreferences.getInstance();
+      final cachedString = prefs.getString('cached_questions');
+      if (cachedString != null && cachedString.isNotEmpty) {
+        final List<dynamic> decoded = jsonDecode(cachedString);
+        final cachedQuestions = decoded
+            .map((json) => Question.fromJson(json))
+            .toList();
+        debugPrint('Loaded ${cachedQuestions.length} questions from cache');
+        return cachedQuestions;
+      }
+      throw Exception('Failed to fetch questions and cache is empty');
     }
   }
 }
